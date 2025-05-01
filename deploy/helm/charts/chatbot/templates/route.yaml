@@ -1,0 +1,23 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    app.openshift.io/connects-to: '[{"apiVersion":"apps/v1","kind":"Deployment","name":"app"}]'
+  labels:
+    app: chatbot
+    app.kubernetes.io/component: chatbot
+    app.kubernetes.io/instance: chatbot
+    app.kubernetes.io/name: chatbot
+    app.kubernetes.io/part-of: baseball-chatbot
+  name: {{ include "baseball-chatbot.fullname" . }}
+spec:
+  port:
+    targetPort: {{ .Values.service.port }}
+  to:
+    kind: Service
+    name: {{ include "baseball-chatbot.fullname" . }}
+    weight: 100
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
+  wildcardPolicy: None

@@ -1,0 +1,110 @@
+"""API Utilities
+
+Utility functions related to connecting with the backend services supporting
+the chatbot.
+"""
+import os
+import logging
+from typing import Tuple, List
+from llama_stack_client import LlamaStackClient, Agent, BaseModel
+from llama_stack_client.types.shared_params.agent_config import ToolConfig
+
+logger = logging.getLogger(__name__)
+
+ENV_LLAMA_STACK_URL = "LLAMA_STACK_URL"
+ENV_LLAMA_STACK_MODEL = "LLAMA_STACK_MODEL"
+
+def get_lls_model_name() -> str:
+    """ Gets the configured LLama Stack model name to use.
+    
+        Returns Model Name
+    """
+    if not ENV_LLAMA_STACK_MODEL in os.environ:
+        raise ValueError("LLama Stack Model is a required environment variable.  'LLAMA_STACK_MODEL' missing.")
+    llama_stack_model_name = os.environ[ENV_LLAMA_STACK_MODEL]
+    if llama_stack_model_name is None:
+        raise ValueError ("LLama Stack Model is a required environment variable.  'LLAMA_STACK_MODEL' is None.")
+    llama_stack_model_name = llama_stack_model_name.strip()
+    if len(llama_stack_model_name) == 0:
+        raise ValueError ("LLama Stack Model is a required environment variable.  'LLAMA_STACK_MODEL' an empty string.")
+    return llama_stack_model_name
+
+def lls_connect() -> Tuple[LlamaStackClient, BaseModel]:
+    """ Connects to the LLama Stack Backend.
+    
+    Returns client and reference to requested model
+    """
+    # get backend details
+    if not ENV_LLAMA_STACK_URL in os.environ:
+        raise ValueError("LLama Stack URL is a required environment variable.  'LLAMA_STACK_URL' missing.")
+    llama_stack_url = os.environ[ENV_LLAMA_STACK_URL]
+    logger.info("LLama Stack URL: %s", llama_stack_url)
+
+    # connect to backend
+    logger.info("Connecting...")
+    llama_stack_client = LlamaStackClient(
+        base_url=llama_stack_url,
+    )
+    logger.info("Connected!")
+
+    # get model details
+    llama_stack_model_name = get_lls_model_name()
+    logger.info("LLama Stack Model: %s", llama_stack_model_name)
+
+    # find model matching name
+    logger.info ("Finding Requested LLama Model...")
+    llama_stack_model = None
+    for model in llama_stack_client.models.list():
+        if model.identifier == llama_stack_model_name:
+            llama_stack_model = model
+            break
+    if llama_stack_model is None:
+        raise ValueError(f"Model Not Found!  name={llama_stack_model_name}")
+
+    return llama_stack_client, llama_stack_model
+
+def lls_create_agent(llama_stack_client : LlamaStackClient,
+                     prompt : str,
+                     tools_list : List[str]) -> Agent:
+    """ Creates an Agent with access to the provided tools.
+    
+        Returns reference to new agent
+    """
+    # validate arguments
+    if llama_stack_client is None:
+        raise ValueError("llama_stack_client is required and cannot be empty.")
+    if prompt is None or len(prompt) == 0:
+        raise ValueError("prompt is required and cannot be empty.")
+
+    # get configuration
+    llama_stack_model_name = get_lls_model_name()
+    if llama_stack_client is None:
+        logger.warning("tools_list is None instead of an empty array")
+        llama_stack_client = []
+
+    # Create the agent
+    logger.info("Creating agent...")
+    llama_stack_agent = Agent(
+        llama_stack_client,
+        model=llama_stack_model_name,
+        instructions=prompt,
+        tools=tools_list,
+        tool_config=ToolConfig(tool_choice = "auto"),
+    )
+    logger.info("Agent Created.")
+
+    return llama_stack_agent
+
+
+def lls_new_session(llama_stack_agent : Agent, session_name : str = "My conversation"):
+    """ Creates a new user session within the agent.
+
+        llama_stack_agent - LLama Stack Agent
+    """
+
+    # Create a session
+    logger.info("Starting new session.  Session Name = %s", session_name)
+    session_id = llama_stack_agent.create_session(session_name=session_name)
+    logger.info("Session Created.  Session ID=%s", session_id)
+
+    return session_id

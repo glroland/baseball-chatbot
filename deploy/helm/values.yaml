@@ -1,0 +1,28 @@
+serviceAccount:
+  create: true
+  annotations: {}
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+global:
+
+  image:
+    repository: registry.home.glroland.com/baseball/
+    tag: 1
+    pullPolicy: IfNotPresent
+    usePullSecret: true
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  useServiceAccount: false
+
+  securityContext: {}
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+

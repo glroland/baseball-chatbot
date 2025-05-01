@@ -1,0 +1,5 @@
+pytest
+pylint
+llama-stack-client
+huggingface_hub[cli]
+mcp[cli]
