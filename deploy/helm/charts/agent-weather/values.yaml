@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  name: agent-schedule
+  name: agent-weather
   port: 8080
 
 nameOverride: ""

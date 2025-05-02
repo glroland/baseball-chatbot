@@ -2,3 +2,4 @@ pytest
 pylint
 llama-stack-client
 mcp[cli]
+psycopg[binary]

@@ -3,34 +3,36 @@ LLAMA_STACK_MODEL := meta-llama/Llama-3.2-11B-Vision-Instruct
 EMBEDDING_MODEL := sentence-transformers/all-mpnet-base-v2
 
 IMAGE_REGISTRY := registry.home.glroland.com/baseball
-IMAGE_TAG := 2
+IMAGE_TAG := 3
 
 LOCAL_PORT_CHATBOT := 8080
+
+BASEBALL_DB_CONNECTION_STRING = postgresql://baseball_app:baseball123@db.home.glroland.com:5432/baseball_db
 
 install:
 	pip install -r requirements.txt
 	pip install -r chatbot/requirements.txt
-	pip install -r agent-schedule/requirements.txt
+	pip install -r agent-weather/requirements.txt
 	pip install -r agent-team/requirements.txt
 
 run.chatbot:
 	cd chatbot/src && LLAMA_STACK_URL=$(LLAMA_STACK_URL) LLAMA_STACK_MODEL=$(LLAMA_STACK_MODEL) streamlit run app.py --server.headless true --server.address 0.0.0.0 --server.port $(LOCAL_PORT_CHATBOT)
 
-run.agent_schedule:
-	cd agent-schedule/src && python mcp_server.py
+run.agent_weather:
+	cd agent-weather/src && python mcp_server.py
 
 run.agent_team:
-	cd agent-team/src && python mcp_server.py
+	cd agent-team/src && MCP_PORT=8080 DB_CONNECTION_STRING=$(BASEBALL_DB_CONNECTION_STRING) python mcp_server.py
 
 build:
 	cd chatbot && podman build . --platform=linux/amd64 -t chatbot:latest
-	cd agent-schedule && podman build . --platform=linux/amd64 -t agent-schedule:latest
+	cd agent-weather && podman build . --platform=linux/amd64 -t agent-weather:latest
 	cd agent-team && podman build . --platform=linux/amd64 -t agent-team:latest
 
 publish:
 	podman tag chatbot:latest $(IMAGE_REGISTRY)/chatbot:$(IMAGE_TAG)
 	podman push $(IMAGE_REGISTRY)/chatbot:$(IMAGE_TAG)
-	podman tag agent-schedule:latest $(IMAGE_REGISTRY)/agent-schedule:$(IMAGE_TAG)
-	podman push $(IMAGE_REGISTRY)/agent-schedule:$(IMAGE_TAG)
+	podman tag agent-weather:latest $(IMAGE_REGISTRY)/agent-weather:$(IMAGE_TAG)
+	podman push $(IMAGE_REGISTRY)/agent-weather:$(IMAGE_TAG)
 	podman tag agent-team:latest $(IMAGE_REGISTRY)/agent-team:$(IMAGE_TAG)
 	podman push $(IMAGE_REGISTRY)/agent-team:$(IMAGE_TAG)

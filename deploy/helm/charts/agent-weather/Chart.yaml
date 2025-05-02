@@ -1,6 +1,6 @@
 apiVersion: v2
-name: agent-schedule
-description: Baseball Schedule Agent
+name: agent-weather
+description: Weather Agent
 
 # A chart can be either an 'application' or a 'library' chart.
 #

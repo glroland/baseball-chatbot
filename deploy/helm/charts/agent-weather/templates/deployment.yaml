@@ -41,24 +41,17 @@ spec:
           ports:
           - containerPort: {{ .Values.image.port }}
           env:
-            - name: JAVA_OPTS_APPEND
-              value: '-Dlogging.level.root=INFO'
+            - name: MCP_PORT
+              value: "{{ .Values.image.port }}"
+            - name: DB_CONNECTION_STRING
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "baseball-chatbot.fullname" . }}
+                  key: DB_CONNECTION_STRING
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
-          volumeMounts:
-          - mountPath: /deployments/config
-            name: application-properties
-            readOnly: true
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      volumes:
-      - configMap:
-          defaultMode: 511
-          items:
-          - key: application.properties
-            path: application.properties
-          name: {{ include "baseball-chatbot.fullname" . }}
-        name: application-properties
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
