@@ -91,6 +91,7 @@ def find_mlb_baseball_teams(team_name:str = None, city:str = None, year:int = No
                 results.append(result)
     
     logger.debug("Results: %s", results)
+    print ("Results", results)
 
     return results
 

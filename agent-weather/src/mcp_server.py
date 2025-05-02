@@ -82,6 +82,7 @@ def get_weather(location: str, date: str) -> float:
     temp = daily.Variables(0).ValuesAsNumpy()[0]   # max temp
 
     logger.info("Temp at %s on %s is %s", location, date, temp)
+    print ("Temp at", location, "on", date, "is", temp)
     return temp
 
 #print (get_weather(location="Atlanta", date="5-1-2025"))

@@ -3,7 +3,7 @@ LLAMA_STACK_MODEL := meta-llama/Llama-3.2-11B-Vision-Instruct
 EMBEDDING_MODEL := sentence-transformers/all-mpnet-base-v2
 
 IMAGE_REGISTRY := registry.home.glroland.com/baseball
-IMAGE_TAG := 4
+IMAGE_TAG := 5
 
 LOCAL_PORT_CHATBOT := 8080
 
