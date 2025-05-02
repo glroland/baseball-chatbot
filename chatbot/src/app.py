@@ -26,7 +26,17 @@ if SessionStateVariables.MESSAGES not in st.session_state:
     # Connect to LLama Stack
     logger.info("Initializing LLama Stack")
     llama_stack_client, llama_stack_model = lls_connect()
-    llama_stack_agent = lls_create_agent(llama_stack_client, AGENT_SYSTEM_PROMPT, [])
+    llama_stack_client.toolgroups.register(
+        toolgroup_id="agent-team",
+        provider_id="model-context-protocol",
+        mcp_endpoint={"uri": "https://b1-agent-team-baseball-chatbot.apps.ocp.home.glroland.com/sse"},
+    )
+    llama_stack_client.toolgroups.register(
+        toolgroup_id="agent-weather",
+        provider_id="model-context-protocol",
+        mcp_endpoint={"uri": "https://b1-agent-weather-baseball-chatbot.apps.ocp.home.glroland.com/sse"},
+    )
+    llama_stack_agent = lls_create_agent(llama_stack_client, AGENT_SYSTEM_PROMPT, ["agent-team", "agent-weather"])
     logger.info("LLama Stack Initialized")
 
     # Save LLama Stack Connection Info

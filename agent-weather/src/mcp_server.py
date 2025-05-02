@@ -8,6 +8,7 @@ import openmeteo_requests
 import pandas as pd
 import requests_cache
 from retry_requests import retry
+import dateparser
 
 # Setup Logging
 logger = logging.getLogger(__name__)
@@ -49,11 +50,15 @@ def get_weather(location: str, date: str) -> float:
     longitude = geo_location.longitude
     logger.info("Location %s has a latitude, longitude position of %s, %s", location, latitude, longitude)
 
-
     # Setup the Open-Meteo API client with cache and retry on error
+    logger.debug("Setting up cache and retries for weather.")
     cache_session = requests_cache.CachedSession('.cache', expire_after = -1)
     retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
     openmeteo = openmeteo_requests.Client(session = retry_session)
+
+    # format date
+    date_parsed = dateparser.parse(date)
+    date_formatted_str = date_parsed.strftime("%Y-%m-%d")
 
     # Make sure all required weather variables are listed here
     # The order of variables in hourly or daily is important to assign them correctly below
@@ -61,33 +66,25 @@ def get_weather(location: str, date: str) -> float:
     params = {
         "latitude": latitude,
         "longitude": longitude,
-        "start_date": date,
-        "end_date": date,
-        "hourly": "temperature_2m",
+        "start_date": date_formatted_str,
+        "end_date": date_formatted_str,
+        "daily": "temperature_2m_max",
         "temperature_unit": "fahrenheit",
         "wind_speed_unit": "mph",
         "precipitation_unit": "inch"
     }
+    logger.info("Invoking weather api...  %s", params)
     responses = openmeteo.weather_api(url, params=params)
-
-    # Process hourly data. The order of variables needs to be the same as requested.
     response = responses[0]
-    hourly = response.Hourly()
-    hourly_temperature_2m = hourly.Variables(0).ValuesAsNumpy()
 
-    hourly_data = {"date": pd.date_range(
-        start = pd.to_datetime(hourly.Time(), unit = "s", utc = True),
-        end = pd.to_datetime(hourly.TimeEnd(), unit = "s", utc = True),
-        freq = pd.Timedelta(seconds = hourly.Interval()),
-        inclusive = "left"
-    )}
+    # Process daily data
+    daily = response.Daily()
+    temp = daily.Variables(0).ValuesAsNumpy()[0]   # max temp
 
-    hourly_data["temperature_2m"] = hourly_temperature_2m
-    hourly_dataframe = pd.DataFrame(data = hourly_data)
-    print(hourly_dataframe)
+    logger.info("Temp at %s on %s is %s", location, date, temp)
+    return temp
 
-    return hourly_temperature_2m[19]
-
+#print (get_weather(location="Atlanta", date="5-1-2025"))
 
 if __name__ == "__main__":
     port = 8080

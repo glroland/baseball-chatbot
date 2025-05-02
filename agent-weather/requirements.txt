@@ -8,3 +8,4 @@ retry-requests
 numpy
 pandas
 geopy
+dateparser
