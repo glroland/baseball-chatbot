@@ -10,17 +10,17 @@ LOCAL_PORT_CHATBOT := 8080
 install:
 	pip install -r requirements.txt
 	pip install -r chatbot/requirements.txt
-	pip install -r agent_schedule/requirements.txt
-	pip install -r agent_team/requirements.txt
+	pip install -r agent-schedule/requirements.txt
+	pip install -r agent-team/requirements.txt
 
 run.chatbot:
 	cd chatbot/src && LLAMA_STACK_URL=$(LLAMA_STACK_URL) LLAMA_STACK_MODEL=$(LLAMA_STACK_MODEL) streamlit run app.py --server.headless true --server.address 0.0.0.0 --server.port $(LOCAL_PORT_CHATBOT)
 
 run.agent_schedule:
-	cd agent_schedule/src && python mcp_server.py
+	cd agent-schedule/src && python mcp_server.py
 
 run.agent_team:
-	cd agent_team/src && python mcp_server.py
+	cd agent-team/src && python mcp_server.py
 
 build:
 	cd chatbot && podman build . --platform=linux/amd64 -t chatbot:latest
