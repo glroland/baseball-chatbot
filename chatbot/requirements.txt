@@ -3,3 +3,4 @@ pylint
 streamlit
 watchdog
 requests
+llama-stack-client

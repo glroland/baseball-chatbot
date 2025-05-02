@@ -43,49 +43,12 @@ spec:
           env:
             - name: JAVA_OPTS_APPEND
               value: '-Dlogging.level.root=INFO'
-            - name: HF_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: app-secrets
-                  key: HF_TOKEN
-            - name: OPENAI_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: app-secrets
-                  key: OPENAI_API_KEY
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
           - mountPath: /deployments/config
             name: application-properties
             readOnly: true
-          readinessProbe:
-            httpGet:
-              path: /actuator/health/readiness
-              port: {{ .Values.image.port }}
-              scheme: HTTP
-            timeoutSeconds: 1
-            periodSeconds: 10
-            successThreshold: 1
-            failureThreshold: 3
-          livenessProbe:
-            httpGet:
-              path: /actuator/health/liveness
-              port: {{ .Values.image.port }}
-              scheme: HTTP
-            timeoutSeconds: 1
-            periodSeconds: 10
-            successThreshold: 1
-            failureThreshold: 3
-          startupProbe:
-            httpGet:
-              path: /actuator/health/liveness
-              port: {{ .Values.image.port }}
-              scheme: HTTP
-            timeoutSeconds: 1
-            periodSeconds: 10
-            successThreshold: 1
-            failureThreshold: 3
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:

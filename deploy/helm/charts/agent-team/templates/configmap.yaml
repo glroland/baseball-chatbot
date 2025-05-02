@@ -6,9 +6,6 @@ metadata:
     {{- include "baseball-chatbot.labels" . | nindent 4 }}
 immutable: false
 data:
-  OPENAI_BASEURL: "{{ .Values.global.appconfig.inferenceUrl }}"
-  OPENAI_MODEL: "{{ .Values.global.appconfig.inferenceModel }}"
-  OPENAI_APIKEY: "nokey"
-  TEMP_PRODUCT_DB_CONN_STRING: "host={{ .Release.Name }}-db port=5432 dbname=ai_product_catalog user=baseball-chatbot password=ai_product_catalog123 connect_timeout=30"
-  PRODUCT_DB_CONN_STRING: "host=db port=5432 dbname=ai_product_catalog user=baseball-chatbot password=ai_product_catalog123 connect_timeout=30"
+  OPENAI_BASEURL: "http://envision:8321"
+  OPENAI_MODEL: "meta-llama/Llama-3.2-11B-Vision-Instruct"
   NUM_WORKERS: "5"

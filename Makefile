@@ -3,7 +3,7 @@ LLAMA_STACK_MODEL := meta-llama/Llama-3.2-11B-Vision-Instruct
 EMBEDDING_MODEL := sentence-transformers/all-mpnet-base-v2
 
 IMAGE_REGISTRY := registry.home.glroland.com/baseball
-IMAGE_TAG := 1
+IMAGE_TAG := 2
 
 LOCAL_PORT_CHATBOT := 8080
 
@@ -24,13 +24,13 @@ run.agent_team:
 
 build:
 	cd chatbot && podman build . --platform=linux/amd64 -t chatbot:latest
-	cd agent_schedule && podman build . --platform=linux/amd64 -t agent_schedule:latest
-	cd agent_team && podman build . --platform=linux/amd64 -t agent_team:latest
+	cd agent-schedule && podman build . --platform=linux/amd64 -t agent-schedule:latest
+	cd agent-team && podman build . --platform=linux/amd64 -t agent-team:latest
 
 publish:
 	podman tag chatbot:latest $(IMAGE_REGISTRY)/chatbot:$(IMAGE_TAG)
 	podman push $(IMAGE_REGISTRY)/chatbot:$(IMAGE_TAG)
-	podman tag agent_schedule:latest $(IMAGE_REGISTRY)/agent_schedule:$(IMAGE_TAG)
-	podman push $(IMAGE_REGISTRY)/agent_schedule:$(IMAGE_TAG)
-	podman tag agent_team:latest $(IMAGE_REGISTRY)/agent_team:$(IMAGE_TAG)
-	podman push $(IMAGE_REGISTRY)/agent_team:$(IMAGE_TAG)
+	podman tag agent-schedule:latest $(IMAGE_REGISTRY)/agent-schedule:$(IMAGE_TAG)
+	podman push $(IMAGE_REGISTRY)/agent-schedule:$(IMAGE_TAG)
+	podman tag agent-team:latest $(IMAGE_REGISTRY)/agent-team:$(IMAGE_TAG)
+	podman push $(IMAGE_REGISTRY)/agent-team:$(IMAGE_TAG)

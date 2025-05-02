@@ -9,7 +9,6 @@ data:
     spring.application.name=baseball-chatbot
 
     # Default Chat Model
-    baseball-chatbot.default-chat-model={{ .Values.global.appconfig.inferenceEngine }}
 
     # Default Model Values (applied to all)
     baseball-chatbot.max-tokens=100
@@ -22,11 +21,6 @@ data:
     baseball-chatbot.hf-api-key=${HF_TOKEN}
 
     # Agent w/Tool Assist Model Configuration 
-    baseball-chatbot.{{ .Values.global.appconfig.inferenceEngine }}.inference-endpoint={{ .Values.global.appconfig.inferenceUrl }}
-    baseball-chatbot.{{ .Values.global.appconfig.inferenceEngine }}.api-key=no-key-needed
-    baseball-chatbot.{{ .Values.global.appconfig.inferenceEngine }}.agent-model-name={{ .Values.global.appconfig.inferenceModel }}
-    baseball-chatbot.{{ .Values.global.appconfig.inferenceEngine }}.embedding-model={{ .Values.global.appconfig.inferenceModel }}
-    #baseball-chatbot.{{ .Values.global.appconfig.inferenceEngine }}.embeddings-dimensions=384
 
     # Database Configuration
     spring.datasource.driver-class-name=org.postgresql.Driver

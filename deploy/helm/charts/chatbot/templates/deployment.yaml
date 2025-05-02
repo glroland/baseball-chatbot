@@ -41,8 +41,10 @@ spec:
           ports:
           - containerPort: {{ .Values.image.port }}
           env:
-            - name: AI_BACKEND_ENDPOINT
-              value: http://{{ .Release.Name }}-storefront-svc:8080
+            - name: LLAMA_STACK_URL
+              value: 'http://envision:8321'
+            - name: LLAMA_STACK_MODEL
+              value: 'meta-llama/Llama-3.2-11B-Vision-Instruct'
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           readinessProbe:
