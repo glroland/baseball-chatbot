@@ -18,7 +18,8 @@ pipeline
                     echo "PATH = ${PATH}"
                 '''
 
-            git 'https://github.com/glroland/baseball-chatbot.git'
+            git branch: 'main', 
+                url: 'https://github.com/glroland/baseball-chatbot.git'
          }
       }
 
@@ -79,22 +80,22 @@ pipeline
                docker.withRegistry('https://registry.home.glroland.com/', 'quay') 
                {
                   sh 'docker load -i agent-team/agent-team-dockerimage.tar'
-                  sh 'docker tag agent-team:$BUILD_NUMBER registry.home.glroland.com/baseball/agent-team:jenkins-$BUILD_NUMBER'
+                  sh 'docker tag agent-team:$BUILD_NUMBER registry.home.glroland.com/baseball/agent-team:$BUILD_NUMBER'
                   sh 'docker rmi agent-team:$BUILD_NUMBER'
-                  sh 'docker push registry.home.glroland.com/baseball/agent-team:jenkins-$BUILD_NUMBER'
-                  sh 'docker rmi registry.home.glroland.com/baseball/agent-team:jenkins-$BUILD_NUMBER'
+                  sh 'docker push registry.home.glroland.com/baseball/agent-team:$BUILD_NUMBER'
+                  sh 'docker rmi registry.home.glroland.com/baseball/agent-team:$BUILD_NUMBER'
                
                   sh 'docker load -i agent-weather/agent-weather-dockerimage.tar'
-                  sh 'docker tag agent-weather:$BUILD_NUMBER registry.home.glroland.com/baseball/agent-weather:jenkins-$BUILD_NUMBER'
+                  sh 'docker tag agent-weather:$BUILD_NUMBER registry.home.glroland.com/baseball/agent-weather:$BUILD_NUMBER'
                   sh 'docker rmi agent-weather:$BUILD_NUMBER'
-                  sh 'docker push registry.home.glroland.com/baseball/agent-weather:jenkins-$BUILD_NUMBER'
-                  sh 'docker rmi registry.home.glroland.com/baseball/agent-weather:jenkins-$BUILD_NUMBER'
+                  sh 'docker push registry.home.glroland.com/baseball/agent-weather:$BUILD_NUMBER'
+                  sh 'docker rmi registry.home.glroland.com/baseball/agent-weather:$BUILD_NUMBER'
                
                   sh 'docker load -i chatbot/chatbot-dockerimage.tar'
-                  sh 'docker tag chatbot:$BUILD_NUMBER registry.home.glroland.com/baseball/chatbot:jenkins-$BUILD_NUMBER'
+                  sh 'docker tag chatbot:$BUILD_NUMBER registry.home.glroland.com/baseball/chatbot:$BUILD_NUMBER'
                   sh 'docker rmi chatbot:$BUILD_NUMBER'
-                  sh 'docker push registry.home.glroland.com/baseball/chatbot:jenkins-$BUILD_NUMBER'
-                  sh 'docker rmi registry.home.glroland.com/baseball/chatbot:jenkins-$BUILD_NUMBER'
+                  sh 'docker push registry.home.glroland.com/baseball/chatbot:$BUILD_NUMBER'
+                  sh 'docker rmi registry.home.glroland.com/baseball/chatbot:$BUILD_NUMBER'
                }
             }
          }
