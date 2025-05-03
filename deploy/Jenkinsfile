@@ -8,10 +8,6 @@ pipeline
       buildDiscarder(logRotator(numToKeepStr: '3'))
    }
 
-   tools 
-   {
-   }
-
    stages
    {
       stage('Prepare') 
