@@ -1,0 +1,107 @@
+pipeline 
+{
+   agent any
+   
+   options 
+   {
+      disableConcurrentBuilds()
+      buildDiscarder(logRotator(numToKeepStr: '3'))
+   }
+
+   tools 
+   {
+   }
+
+   stages
+   {
+      stage('Prepare') 
+      {
+         steps 
+         {
+            sh '''
+                    echo "PATH = ${PATH}"
+                '''
+
+            git 'https://github.com/glroland/baseball-chatbot.git'
+         }
+      }
+
+      stage('Scan for OWASP Issues in Dependencies') 
+      {
+         steps 
+         {
+            dependencyCheck additionalArguments: ''' 
+                       -o "./" 
+                       -s "./"
+                       -f "ALL" 
+                       --prettyPrint''', odcInstallation: 'OWASP Dependency-Check'
+   
+            dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+            step(followSymlinks: false, artifacts: '**/dependency-check-report.*', $class: 'ArtifactArchiver')
+         }
+      }
+
+      stage('Create Docker Image for agent-team') 
+      {
+         steps 
+         {
+            sh 'cd agent-team ; docker build . --tag agent-team:$BUILD_NUMBER'
+            sh 'cd agent-team ; docker save agent-team:$BUILD_NUMBER > agent-team-dockerimage.tar'
+            step(followSymlinks: false, artifacts: 'agent-team/agent-team-dockerimage.tar', $class: 'ArtifactArchiver')
+            sh 'cd agent-team ; docker rmi agent-team:$BUILD_NUMBER'
+         }
+      }
+
+      stage('Create Docker Image for agent-weather') 
+      {
+         steps 
+         {
+            sh 'cd agent-weather ; docker build . --tag agent-weather:$BUILD_NUMBER'
+            sh 'cd agent-weather ; docker save agent-weather:$BUILD_NUMBER > agent-weather-dockerimage.tar'
+            step(followSymlinks: false, artifacts: 'agent-weather/agent-weather-dockerimage.tar', $class: 'ArtifactArchiver')
+            sh 'cd agent-weather ; docker rmi agent-weather:$BUILD_NUMBER'
+         }
+      }
+
+      stage('Create Docker Image for chatbot') 
+      {
+         steps 
+         {
+            sh 'cd chatbot ; docker build . --tag chatbot:$BUILD_NUMBER'
+            sh 'cd chatbot ; docker save chatbot:$BUILD_NUMBER > chatbot-dockerimage.tar'
+            step(followSymlinks: false, artifacts: 'chatbot/chatbot-dockerimage.tar', $class: 'ArtifactArchiver')
+            sh 'cd chatbot ; docker rmi chatbot:$BUILD_NUMBER'
+         }
+      }
+
+      stage('Reload then push images to quay') 
+      {
+         steps 
+         {
+            script 
+            {
+               docker.withRegistry('https://registry.home.glroland.com/', 'quay') 
+               {
+                  sh 'docker load -i agent-team/agent-team-dockerimage.tar'
+                  sh 'docker tag agent-team:$BUILD_NUMBER registry.home.glroland.com/baseball/agent-team:jenkins-$BUILD_NUMBER'
+                  sh 'docker rmi agent-team:$BUILD_NUMBER'
+                  sh 'docker push registry.home.glroland.com/baseball/agent-team:jenkins-$BUILD_NUMBER'
+                  sh 'docker rmi registry.home.glroland.com/baseball/agent-team:jenkins-$BUILD_NUMBER'
+               
+                  sh 'docker load -i agent-weather/agent-weather-dockerimage.tar'
+                  sh 'docker tag agent-weather:$BUILD_NUMBER registry.home.glroland.com/baseball/agent-weather:jenkins-$BUILD_NUMBER'
+                  sh 'docker rmi agent-weather:$BUILD_NUMBER'
+                  sh 'docker push registry.home.glroland.com/baseball/agent-weather:jenkins-$BUILD_NUMBER'
+                  sh 'docker rmi registry.home.glroland.com/baseball/agent-weather:jenkins-$BUILD_NUMBER'
+               
+                  sh 'docker load -i chatbot/chatbot-dockerimage.tar'
+                  sh 'docker tag chatbot:$BUILD_NUMBER registry.home.glroland.com/baseball/chatbot:jenkins-$BUILD_NUMBER'
+                  sh 'docker rmi chatbot:$BUILD_NUMBER'
+                  sh 'docker push registry.home.glroland.com/baseball/chatbot:jenkins-$BUILD_NUMBER'
+                  sh 'docker rmi registry.home.glroland.com/baseball/chatbot:jenkins-$BUILD_NUMBER'
+               }
+            }
+         }
+      }
+   }
+}
