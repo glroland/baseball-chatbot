@@ -42,9 +42,30 @@ spec:
           - containerPort: {{ .Values.image.port }}
           env:
             - name: LLAMA_STACK_URL
-              value: 'http://envision:8321'
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "baseball-chatbot.fullname" . }}
+                  key: LLAMA_STACK_URL
             - name: LLAMA_STACK_MODEL
-              value: 'meta-llama/Llama-3.2-11B-Vision-Instruct'
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "baseball-chatbot.fullname" . }}
+                  key: LLAMA_STACK_MODEL
+            - name: EMBEDDING_MODEL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "baseball-chatbot.fullname" . }}
+                  key: EMBEDDING_MODEL
+            - name: AGENT_WEATHER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "baseball-chatbot.fullname" . }}
+                  key: AGENT_WEATHER_URL
+            - name: AGENT_TEAM_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "baseball-chatbot.fullname" . }}
+                  key: AGENT_TEAM_URL
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           readinessProbe:
