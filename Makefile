@@ -1,5 +1,5 @@
-LLAMA_STACK_URL := http://envision:8321
-LLAMA_STACK_MODEL := meta-llama/Llama-3.2-11B-Vision-Instruct
+LLAMA_STACK_URL := https://my-llama-stack-my-llama-stack.apps.ocp.home.glroland.com
+LLAMA_STACK_MODEL := meta-llama/Llama-3.2-3B-Instruct
 EMBEDDING_MODEL := sentence-transformers/all-mpnet-base-v2
 
 IMAGE_REGISTRY := registry.home.glroland.com/baseball
