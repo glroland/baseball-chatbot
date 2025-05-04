@@ -10,7 +10,7 @@ from constants import CannedGreetings
 from constants import MessageAttributes
 from constants import AGENT_SYSTEM_PROMPT
 from lls_gateway import lls_connect, lls_create_agent, lls_new_session
-from agents import setup_agents, BASEBALL_CHAT_AGENTS
+from tools import setup_tools, BASEBALL_CHAT_AGENTS
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ if SessionStateVariables.MESSAGES not in st.session_state:
     # Connect to LLama Stack
     logger.info("Initializing LLama Stack")
     llama_stack_client, llama_stack_model = lls_connect()
-    setup_agents(llama_stack_client)
+    setup_tools(llama_stack_client)
     llama_stack_agent = lls_create_agent(llama_stack_client, AGENT_SYSTEM_PROMPT, BASEBALL_CHAT_AGENTS)
     logger.info("LLama Stack Initialized")
 

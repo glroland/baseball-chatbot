@@ -1,7 +1,7 @@
 """ Constants for the Baseball Chatbot Application
 """
 
-AGENT_SYSTEM_PROMPT = "You are a knowledgable in all things baseball and specialize in Major League Baseball specifically.  Provide concise responses where possible."
+AGENT_SYSTEM_PROMPT = "You are a knowledgable in all things baseball and specialize in Major League Baseball specifically.  Provide concise responses where possible.  Tools should be used when relevant to the user prompt but can be ignored otherwise.  Do not comment about tool use when tools are ignored."
 
 # pylint: disable=too-few-public-methods
 class SessionStateVariables:

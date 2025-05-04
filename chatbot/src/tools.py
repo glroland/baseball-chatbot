@@ -19,28 +19,22 @@ def register_mcp_tool(llama_stack_client, all_toolgroups, agent_name, agent_url)
         agent_url - mcp endpoint of tool
     """
     # check to see if already registered
-    was_registered = False
     for toolgroup in all_toolgroups:
         if toolgroup.identifier == agent_name:
             logger.warning("MCP Agent Already Registered!  Name=%s ToolGroup=%s", agent_name, toolgroup)
 
-            # check to see if the endpoints match
-            if toolgroup.mcp_endpoint is not None and toolgroup.mcp_endpoint.uri == agent_url:
-                logger.info("MCP Agent registered to matching URL.  URL=%s", toolgroup.mcp_endpoint)
-                was_registered = True
-            else:
-                logger.warning("MCP endpoint does not match for tool.  Unregistering before registering...  Name=%s  OldEndpoint=%s  NewEndpoint=%s", agent_name, toolgroup.mcp_endpoint.uri, agent_url)
-                llama_stack_client.toolgroups.unregister(toolgroup_id=agent_name)
+            # always unregister
+            logger.warning("Unregistering existing tool before re-registering...  Name=%s", agent_name)
+            llama_stack_client.toolgroups.unregister(toolgroup_id=agent_name)
 
     # register agent
-    if not was_registered:
-        llama_stack_client.toolgroups.register(
-            toolgroup_id=agent_name,
-            provider_id="model-context-protocol",
-            mcp_endpoint={"uri": agent_url},
-        )
+    llama_stack_client.toolgroups.register(
+        toolgroup_id=agent_name,
+        provider_id="model-context-protocol",
+        mcp_endpoint={"uri": agent_url},
+    )
 
-def setup_agents(llama_stack_client):
+def setup_tools(llama_stack_client):
     """ Sets the required agents up in LLama Stack.
     """
     # Get configurable values
