@@ -7,7 +7,7 @@ import os
 import logging
 from typing import Tuple, List
 from llama_stack_client import LlamaStackClient, Agent, BaseModel
-from llama_stack_client.types.shared_params.agent_config import ToolConfig
+from llama_stack_client.types.shared_params.agent_config import ToolConfig, AgentConfig
 
 logger = logging.getLogger(__name__)
 
@@ -84,12 +84,17 @@ def lls_create_agent(llama_stack_client : LlamaStackClient,
 
     # Create the agent
     logger.info("Creating agent...")
+    agent_config = AgentConfig(tool_choice="auto",
+                               tool_config=ToolConfig(tool_choice = "auto"),
+                               toolgroups=tools_list,
+                               model=llama_stack_model_name,
+                               instructions=prompt,
+                               enable_session_persistence=True,
+                               max_infer_iters=10)
+
     llama_stack_agent = Agent(
         llama_stack_client,
-        model=llama_stack_model_name,
-        instructions=prompt,
-        tools=tools_list,
-        tool_config=ToolConfig(tool_choice = "auto"),
+        agent_config=agent_config,
     )
     logger.info("Agent Created.")
 

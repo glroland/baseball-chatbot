@@ -29,38 +29,47 @@ mcp = FastMCP(name="Weather MCP Server",
               host="0.0.0.0",
               port=mcp_port)
 
-def get_current_temp(openmeteo,
-                     latitude,
-                     longitude,
-                     location) -> float:
-    # Make sure all required weather variables are listed here
-    # The order of variables in hourly or daily is important to assign them correctly below
-    url = "https://api.open-meteo.com/v1/forecast"
-    params = {
-        "latitude": latitude,
-        "longitude": longitude,
-        "current": "temperature_2m",
-        "wind_speed_unit": "mph",
-        "temperature_unit": "fahrenheit",
-        "precipitation_unit": "inch"
+@mcp.tool(
+    annotations={
+        "title": "Get the past weather for the provided location as of a specific date.",
+        "readOnlyHint": True,
+        "openWorldHint": True,
     }
-    logger.info("Invoking weather api...  %s", params)
-    responses = openmeteo.weather_api(url, params=params)
-    response = responses[0]
+)
+def get_weather_on_past_date(location: str, date: str = None) -> float:
+    """ Gets the weather for the provided location on the specified date.
 
-    # Process daily data
-    current = response.Current()
-    temp = current.Variables(0).Value()
+    :param location: Location
+    :param date: Date in which to pull the weather (optional)
+    :returns: Temperature as of the provided date
+    """
+    logger.info ("Getting weather.  Location=%s Date=%s", location, date)
 
-    logger.info("Temp at %s is currently %s", location, temp)
-    print ("Temp at", location, "is currently", temp)
-    return temp
+    # validate parameters
+    if location is None or len(location) == 0:
+        msg = "Location is required but is empty!"
+        logger.error(msg)
+        raise ValueError(msg)
+    if date is None or len(date) == 0:
+        msg = "Date is required but is empty!"
+        logger.error(msg)
+        raise ValueError(msg)
 
-def get_historic_temp(openmeteo,
-                      latitude,
-                      longitude,
-                      location,
-                      date) -> float:
+    # get latitude and longitude for location
+    geolocator = Nominatim(user_agent="agent-weather")
+    geo_location = geolocator.geocode(location)
+    latitude = geo_location.latitude
+    longitude = geo_location.longitude
+    logger.info("Location %s has a latitude, longitude position of %s, %s", location, latitude, longitude)
+
+    # Setup the Open-Meteo API client with cache and retry on error
+    logger.debug("Setting up cache and retries for weather.")
+    cache_session = requests_cache.CachedSession('.weather-cache', expire_after = -1, use_temp=True)
+    retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
+    openmeteo = openmeteo_requests.Client(session = retry_session)
+
+    # get temperature for date
+    logger.info("Getting Temperature for %s as of %s", location, date)
     # format date
     date_parsed = dateparser.parse(date)
     date_formatted_str = date_parsed.strftime("%Y-%m-%d")
@@ -88,23 +97,24 @@ def get_historic_temp(openmeteo,
 
     logger.info("Temp at %s on %s is %s", location, date, temp)
     print ("Temp at", location, "on", date, "is", temp)
+
     return temp
+
 
 @mcp.tool(
     annotations={
-        "title": "Get the weather for the provided date and location.",
+        "title": "Get the current weather temperature for the provided location.",
         "readOnlyHint": True,
         "openWorldHint": True,
     }
 )
-def get_weather(location: str, date: str = None) -> float:
+def get_current_weather(location: str) -> float:
     """ Gets the weather for the provided location on the specified date.
 
     :param location: Location
-    :param date: Date in which to pull the weather (optional)
-    :returns: Temperature as of the provided date
+    :returns: Current weather / temperature
     """
-    logger.info ("Getting weather.  Location=%s Date=%s", location, date)
+    logger.info ("Getting current weather for location.  Location=%s", location)
 
     # validate parameters
     if location is None or len(location) == 0:
@@ -121,33 +131,36 @@ def get_weather(location: str, date: str = None) -> float:
 
     # Setup the Open-Meteo API client with cache and retry on error
     logger.debug("Setting up cache and retries for weather.")
-    cache_session = requests_cache.CachedSession('.cache', expire_after = -1)
+    cache_session = requests_cache.CachedSession('.weather-cache', expire_after = -1, use_temp=True)
     retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
     openmeteo = openmeteo_requests.Client(session = retry_session)
 
-    temp = None
-
     # get current temperature
-    if date is None or len(date) == 0:
-        logger.info("Getting Current Temperature for %s", location)
-        temp = get_current_temp(openmeteo,
-                                latitude,
-                                longitude,
-                                location)
-    else:
+    # Make sure all required weather variables are listed here
+    # The order of variables in hourly or daily is important to assign them correctly below
+    url = "https://api.open-meteo.com/v1/forecast"
+    params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "current": "temperature_2m",
+        "wind_speed_unit": "mph",
+        "temperature_unit": "fahrenheit",
+        "precipitation_unit": "inch"
+    }
+    logger.info("Invoking weather api...  %s", params)
+    responses = openmeteo.weather_api(url, params=params)
+    response = responses[0]
 
-        logger.info("Getting Temperature for %s as of %s", location, date)
-        temp = get_historic_temp(openmeteo,
-                                 latitude,
-                                 longitude,
-                                 location,
-                                 date)
+    # Process daily data
+    current = response.Current()
+    temp = current.Variables(0).Value()
 
-    logger.debug("Resulting temp is %s", temp)
+    logger.info("Temp at %s is currently %s", location, temp)
+    print ("Temp at", location, "is currently", temp)
     return temp
 
-#print (get_weather(location="Atlanta"))
-#print (get_weather(location="Atlanta", date="2-1-2025"))
+#print (get_current_weather(location="Atlanta"))
+#print (get_weather_on_past_date(location="Atlanta", date="2-1-2025"))
 
 if __name__ == "__main__":
     port = 8080
