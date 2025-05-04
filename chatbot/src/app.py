@@ -2,7 +2,6 @@
 
 Digital expert in all things MLB.
 """
-import os
 import logging
 import streamlit as st
 from constants import SessionStateVariables
@@ -11,9 +10,7 @@ from constants import CannedGreetings
 from constants import MessageAttributes
 from constants import AGENT_SYSTEM_PROMPT
 from lls_gateway import lls_connect, lls_create_agent, lls_new_session
-
-ENV_AGENT_WEATHER_URL = "AGENT_WEATHER_URL"
-ENV_AGENT_TEAM_URL = "AGENT_TEAM_URL"
+from agents import setup_agents, BASEBALL_CHAT_AGENTS
 
 logger = logging.getLogger(__name__)
 
@@ -27,34 +24,11 @@ logging.basicConfig(level=logging.DEBUG,
 if SessionStateVariables.MESSAGES not in st.session_state:
     st.session_state[SessionStateVariables.MESSAGES] = []
 
-    # Get configurable values
-    agent_team_url = os.environ[ENV_AGENT_TEAM_URL]
-    if agent_team_url is None or len(agent_team_url):
-        msg = "Agent Team URL is required and cannot be empty!"
-        logger.error(msg)
-        raise ValueError(msg)
-    logger.info("Team Agent URL: %s", agent_team_url)
-    agent_weather_url = os.environ[ENV_AGENT_WEATHER_URL]
-    if agent_weather_url is None or len(agent_weather_url):
-        msg = "Agent Weather URL is required and cannot be empty!"
-        logger.error(msg)
-        raise ValueError(msg)
-    logger.info("Weather Agent URL: %s", agent_weather_url)
-
     # Connect to LLama Stack
     logger.info("Initializing LLama Stack")
     llama_stack_client, llama_stack_model = lls_connect()
-    llama_stack_client.toolgroups.register(
-        toolgroup_id="agent-team",
-        provider_id="model-context-protocol",
-        mcp_endpoint={"uri": agent_team_url},
-    )
-    llama_stack_client.toolgroups.register(
-        toolgroup_id="agent-weather",
-        provider_id="model-context-protocol",
-        mcp_endpoint={"uri": agent_weather_url},
-    )
-    llama_stack_agent = lls_create_agent(llama_stack_client, AGENT_SYSTEM_PROMPT, ["agent-team", "agent-weather"])
+    setup_agents(llama_stack_client)
+    llama_stack_agent = lls_create_agent(llama_stack_client, AGENT_SYSTEM_PROMPT, BASEBALL_CHAT_AGENTS)
     logger.info("LLama Stack Initialized")
 
     # Save LLama Stack Connection Info

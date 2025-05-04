@@ -8,6 +8,8 @@ IMAGE_TAG := manual-1
 LOCAL_PORT_CHATBOT := 8080
 
 BASEBALL_DB_CONNECTION_STRING = postgresql://baseball_app:baseball123@db.home.glroland.com:5432/baseball_db
+AGENT_WEATHER_URL = https://baseball-chatbot-agent-weather-baseball-chatbot.apps.ocp.home.glroland.com/sse
+AGENT_TEAM_URL = https://baseball-chatbot-agent-team-baseball-chatbot.apps.ocp.home.glroland.com/sse
 
 install:
 	pip install -r requirements.txt
@@ -16,7 +18,7 @@ install:
 	pip install -r agent-team/requirements.txt
 
 run.chatbot:
-	cd chatbot/src && LLAMA_STACK_URL=$(LLAMA_STACK_URL) LLAMA_STACK_MODEL=$(LLAMA_STACK_MODEL) streamlit run app.py --server.headless true --server.address 0.0.0.0 --server.port $(LOCAL_PORT_CHATBOT)
+	cd chatbot/src && LLAMA_STACK_URL=$(LLAMA_STACK_URL) LLAMA_STACK_MODEL=$(LLAMA_STACK_MODEL) AGENT_WEATHER_URL=$(AGENT_WEATHER_URL) AGENT_TEAM_URL=$(AGENT_TEAM_URL) streamlit run app.py --server.headless true --server.address 0.0.0.0 --server.port $(LOCAL_PORT_CHATBOT)
 
 run.agent_weather:
 	cd agent-weather/src && python mcp_server.py
