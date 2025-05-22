@@ -25,25 +25,25 @@ logger = logging.getLogger(__name__)
 
 # Start MCP Server
 mcp = FastMCP(name="Weather MCP Server",
-              instructions="Tool for getting the temperature or weather on a particular date in the provided location.  The date parameter is optional and defaults to today.",
+#              instructions="Tool for getting the temperature on a particular date in the provided location.  The date parameter is optional and defaults to today.",
               host="0.0.0.0",
               port=mcp_port)
 
 @mcp.tool(
     annotations={
-        "title": "Get the past weather for the provided location as of a specific date.",
+        "title": "Look up what the temperature was at a location on a date in the past.",
         "readOnlyHint": True,
         "openWorldHint": True,
     }
 )
-def get_weather_on_past_date(location: str, date: str = None) -> float:
-    """ Gets the weather for the provided location on the specified date.
+def get_temperature_on_past_date(location: str, date: str = None) -> float:
+    """ Gets the temperature for the provided location on the specified date.
 
     :param location: Location
     :param date: Date in which to pull the weather (optional)
     :returns: Temperature as of the provided date
     """
-    logger.info ("Getting weather.  Location=%s Date=%s", location, date)
+    logger.info ("Getting temperature.  Location=%s Date=%s", location, date)
 
     # validate parameters
     if location is None or len(location) == 0:
@@ -103,18 +103,18 @@ def get_weather_on_past_date(location: str, date: str = None) -> float:
 
 @mcp.tool(
     annotations={
-        "title": "Get the current weather temperature for the provided location.",
+        "title": "Gets the current temperature at a location.",
         "readOnlyHint": True,
         "openWorldHint": True,
     }
 )
-def get_current_weather(location: str) -> float:
-    """ Gets the weather for the provided location on the specified date.
+def get_current_temperature(location: str) -> float:
+    """ Gets the temperature for the provided location on the specified date.
 
     :param location: Location
     :returns: Current weather / temperature
     """
-    logger.info ("Getting current weather for location.  Location=%s", location)
+    logger.info ("Getting current temperature for location.  Location=%s", location)
 
     # validate parameters
     if location is None or len(location) == 0:
@@ -159,12 +159,18 @@ def get_current_weather(location: str) -> float:
     print ("Temp at", location, "is currently", temp)
     return temp
 
-#print (get_current_weather(location="Atlanta"))
-#print (get_weather_on_past_date(location="Atlanta", date="2-1-2025"))
-
 if __name__ == "__main__":
     port = 8080
     if ENV_MCP_PORT in os.environ:
         port = int(os.environ[ENV_MCP_PORT])
 
+    print ("Testing get_current_temperature...")
+    print (get_current_temperature(location="Atlanta"))
+    print ()
+
+    print ("Testing get_temperature_on_past_date....")
+    print (get_temperature_on_past_date(location="Atlanta", date="2-1-2025"))
+    print ()
+
+    print ("Starting MCP Server...")
     uvicorn.run(mcp.sse_app(), host="0.0.0.0", port=port, log_level="trace")
