@@ -1,9 +1,9 @@
 import os
 import logging
 from typing import Dict, Any, List
-from mcp.server.fastmcp import FastMCP
-import uvicorn
 import psycopg
+import uvicorn
+from mcp.server.fastmcp import FastMCP
 
 # Setup Logging
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ def find_mlb_baseball_teams(team_name:str = None, city:str = None, year:int = No
             sql += "and "
         prev = True
         league_code = league[0]
-        sql += f"upper(leage) = upper('{league_code}') "
+        sql += f"upper(league) = upper('{league_code}') "
     logger.debug ("Generated SQL for search - ", sql)
 
     # get connection string
@@ -95,6 +95,120 @@ def find_mlb_baseball_teams(team_name:str = None, city:str = None, year:int = No
 
     return results
 
+
+def convert_hand_code_to_description(hand_code):
+    """ Convert the hand code to a description.
+    :param hand_code: Hand code (L, R, B)
+    :returns: Hand description (Left, Right, Both)
+    """
+    if hand_code == "L":
+        return "Left"
+    elif hand_code == "R":
+        return "Right"
+    elif hand_code == "B":
+        return "Both"
+    else:
+        return "Unknown"
+
+
+@mcp.tool(
+    annotations={
+        "title": "Search the Major League Baseball team rosters using the information provided.  At least one field must be provided.",
+        "readOnlyHint": True,
+        "openWorldHint": True,
+    }
+)
+def search_mlb_rosters(team_name:str = None,
+                       year:int = None,
+                       position:str = None,
+                       name:str = None) -> List[Dict[str, Any]]:
+    """ Search the Major League Baseball team rosters using the information provided.
+
+    At least one search parameter must be provided.
+
+    :param team_name: Name of the team (optional)
+    :param year: Season in which to search for (optional)
+    :param position: Field position (optional)
+    :param name: Player name (optional)
+    :returns: List of dictionaries containing matching player attributes
+    """
+    logger.info ("Performing Roster Search.  TeamName=%s Year=%s Position=%s Name=%s", team_name, year, position, name)
+
+    # validate parameters
+    if team_name is None and year is None and position is None and name is None:
+        logger.error("At least one search parameter must be specified.")
+        raise ValueError("No search parameter specified!")
+
+    # build query
+    sql = """
+        select roster.season_year, team_name, first_name, last_name, field_pos_desc, throw_hand, batting_hand
+        from roster, team, field_pos
+        where roster.team_code = team.team_code
+        and roster.season_year = team.season_year
+        and roster.position = field_pos.field_pos_cd
+        """
+    if team_name is not None and len(team_name) > 0:
+        sql += f"and upper(team_name) like upper('%{team_name}%') "
+    if year is not None:
+        sql += f"and roster.season_year = {year} "
+    if position is not None and len(position) > 0:
+        sql += f"and upper(field_pos_desc) like upper('%{position}%') "
+    if name is not None and len(name) > 0:
+        sql += f"""
+            and (
+                upper('{name}') like '%' || upper(first_name) || '%' || upper(last_name) || '%'
+                or
+                upper('{name}') like '%' || upper(first_name) || '%'
+                or
+                upper('{name}') like '%' || upper(last_name) || '%'
+                )
+                """
+    logger.debug ("Generated SQL for search - ", sql)
+
+    # get connection string
+    if not ENV_DB_CONNECTION_STRING in os.environ:
+        raise ValueError("Database Connection String is a required environment variable.  DB_CONNECTION_STRING not set.")
+    db_connection_string = os.environ[ENV_DB_CONNECTION_STRING]
+
+    results = []
+
+    # connect to database
+    with psycopg.connect(db_connection_string) as db_connection:
+        with db_connection.cursor() as db_cursor:
+
+            # execute the dynamically generated sql
+            db_cursor.execute(sql)
+            for record in db_cursor:
+                # collect row data
+                season = record[0]
+                team_name = record[1]
+                first_name = record[2]
+                last_name = record[3]
+                field_pos_desc = record[4]
+                throw_hand_code = record[5]
+                batting_hand_code = record[6]
+
+                # convert hand codes to descriptions
+                throw_hand = convert_hand_code_to_description(throw_hand_code)
+                batting_hand = convert_hand_code_to_description(batting_hand_code)
+
+                result = {
+                    "Season": season,
+                    "Team": team_name,
+                    "Name": first_name + " " + last_name,
+                    "Position": field_pos_desc,
+                    "Throwing Hand": throw_hand,
+                    "Batting Hand": batting_hand
+                }
+                results.append(result)
+    
+    logger.debug("Results: %s", results)
+    print ("Results:", results)
+
+    return results
+
+#search_mlb_rosters(team_name='Braves', year=2023, position = "pitcher", name = "strider")
+#search_mlb_rosters(team_name='Braves', year=2023, position = "pitcher", name = "spencer strider")
 
 if __name__ == "__main__":
     port = 8080
