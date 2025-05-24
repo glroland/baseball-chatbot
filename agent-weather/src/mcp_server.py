@@ -1,18 +1,17 @@
 import os
 import logging
-from typing import Dict, Any, List
+import dateparser
+import uvicorn
 from mcp.server.fastmcp import FastMCP
+from starlette.responses import JSONResponse
 from geopy.geocoders import Nominatim
 import openmeteo_requests
-import pandas as pd
 import requests_cache
 from retry_requests import retry
-import dateparser
-from datetime import datetime
-import uvicorn
 
 # configurable parameters
 ENV_MCP_PORT = "MCP_PORT"
+ENV_LOG_LEVEL = "LOG_LEVEL"
 
 # setup MCP server
 mcp_port = 8080
@@ -24,14 +23,11 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Start MCP Server
-mcp = FastMCP(name="Weather MCP Server",
-#              instructions="Tool for getting the temperature on a particular date in the provided location.  The date parameter is optional and defaults to today.",
-              host="0.0.0.0",
-              port=mcp_port)
+mcp = FastMCP(name="Weather MCP Server")
 
 @mcp.tool(
     annotations={
-        "title": "Look up what the temperature was at a location on a date in the past.",
+        "title": "Lookup a Past Temperature",
         "readOnlyHint": True,
         "openWorldHint": True,
     }
@@ -103,7 +99,7 @@ def get_temperature_on_past_date(location: str, date: str = None) -> float:
 
 @mcp.tool(
     annotations={
-        "title": "Gets the current temperature at a location.",
+        "title": "Get the Current Temperature",
         "readOnlyHint": True,
         "openWorldHint": True,
     }
@@ -159,10 +155,20 @@ def get_current_temperature(location: str) -> float:
     print ("Temp at", location, "is currently", temp)
     return temp
 
+
+sse_app = mcp.sse_app()
+
+@sse_app.route("/health")
+async def health_check(request):
+    """ Health check endpoint for the MCP Server. """
+    return JSONResponse({"status": "ok"})
+
+
 if __name__ == "__main__":
     port = 8080
     if ENV_MCP_PORT in os.environ:
         port = int(os.environ[ENV_MCP_PORT])
+    print ("Port: ", port)
 
     print ("Testing get_current_temperature...")
     print (get_current_temperature(location="Atlanta"))
@@ -172,5 +178,10 @@ if __name__ == "__main__":
     print (get_temperature_on_past_date(location="Atlanta", date="2-1-2025"))
     print ()
 
+    log_level = "info"
+    if ENV_LOG_LEVEL in os.environ:
+        log_level = os.environ[ENV_LOG_LEVEL]
+    print ("Log Level: ", log_level)
+
     print ("Starting MCP Server...")
-    uvicorn.run(mcp.sse_app(), host="0.0.0.0", port=port, log_level="trace")
+    uvicorn.run(sse_app, host="0.0.0.0", port=port, log_level=log_level)

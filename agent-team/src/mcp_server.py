@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 ENV_DB_CONNECTION_STRING = "DB_CONNECTION_STRING"
 ENV_MCP_PORT = "MCP_PORT"
+ENV_LOG_LEVEL = "LOG_LEVEL"
 
 mcp = FastMCP("MLB Baseball Teams MCP Server")
 
@@ -222,7 +223,7 @@ sse_app = mcp.sse_app()
 
 @sse_app.route("/health")
 async def health_check(request):
-    """ Health check endpoint for the FastAPI app. """
+    """ Health check endpoint for the MCP Server. """
     # check database connection
     db_connection_string = os.environ[ENV_DB_CONNECTION_STRING]
     with psycopg.connect(db_connection_string) as db_connection:
@@ -243,5 +244,11 @@ if __name__ == "__main__":
     port = 8080
     if ENV_MCP_PORT in os.environ:
         port = int(os.environ[ENV_MCP_PORT])
+    print ("Port: ", port)
 
-    uvicorn.run(sse_app, host="0.0.0.0", port=port)
+    log_level = "info"
+    if ENV_LOG_LEVEL in os.environ:
+        log_level = os.environ[ENV_LOG_LEVEL]
+    print ("Log Level: ", log_level)
+
+    uvicorn.run(sse_app, host="0.0.0.0", port=port, log_level=log_level)
