@@ -83,7 +83,6 @@ def find_mlb_baseball_teams(team_name:str = None, city:str = None, year:int = No
                     league = "National League"
                 result = {
                     "Season": record[0],
-                    "Team Code": record[1],
                     "League": league,
                     "Location": record[3],
                     "Name": record[4]
@@ -148,7 +147,13 @@ def search_mlb_rosters(team_name:str = None,
         and roster.position = field_pos.field_pos_cd
         """
     if team_name is not None and len(team_name) > 0:
-        sql += f"and upper(team_name) like upper('%{team_name}%') "
+        sql += f"""
+            and (
+                upper(team_name) like upper('%{team_name}%')
+                or
+                upper('%{team_name}%') like '%' || upper(team_location) || '%' || upper(team_name) || '%'
+                )
+                """
     if year is not None:
         sql += f"and roster.season_year = {year} "
     if position is not None and len(position) > 0:
@@ -209,6 +214,9 @@ def search_mlb_rosters(team_name:str = None,
 
 #search_mlb_rosters(team_name='Braves', year=2023, position = "pitcher", name = "strider")
 #search_mlb_rosters(team_name='Braves', year=2023, position = "pitcher", name = "spencer strider")
+#search_mlb_rosters(team_name='Braves', year=None, position = None, name = "Ozuna")
+#search_mlb_rosters(team_name='Atlanta Braves', year=None, position = None, name = "Ozuna")
+
 
 if __name__ == "__main__":
     port = 8080
