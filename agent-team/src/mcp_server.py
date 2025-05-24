@@ -1,6 +1,7 @@
 import os
 import logging
 from typing import Dict, Any, List
+from pprint import pprint
 import psycopg
 import uvicorn
 from mcp.server.fastmcp import FastMCP
@@ -163,12 +164,11 @@ def search_mlb_rosters(team_name:str = None,
             and (
                 upper('{name}') like '%' || upper(first_name) || '%' || upper(last_name) || '%'
                 or
-                upper('{name}') like '%' || upper(first_name) || '%'
-                or
                 upper('{name}') like '%' || upper(last_name) || '%'
                 )
                 """
     logger.debug ("Generated SQL for search - ", sql)
+    print ("Generated SQL for search: ", sql)
 
     # get connection string
     if not ENV_DB_CONNECTION_STRING in os.environ:
@@ -208,7 +208,7 @@ def search_mlb_rosters(team_name:str = None,
                 results.append(result)
     
     logger.debug("Results: %s", results)
-    print ("Results:", results)
+    pprint (results)
 
     return results
 
@@ -216,6 +216,7 @@ def search_mlb_rosters(team_name:str = None,
 #search_mlb_rosters(team_name='Braves', year=2023, position = "pitcher", name = "spencer strider")
 #search_mlb_rosters(team_name='Braves', year=None, position = None, name = "Ozuna")
 #search_mlb_rosters(team_name='Atlanta Braves', year=None, position = None, name = "Ozuna")
+search_mlb_rosters(team_name=None, year=None, position = "Pitcher", name = "Chris Sale")
 
 
 if __name__ == "__main__":
