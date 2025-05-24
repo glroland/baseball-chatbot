@@ -5,6 +5,7 @@ from pprint import pprint
 import psycopg
 import uvicorn
 from mcp.server.fastmcp import FastMCP
+from starlette.responses import JSONResponse
 
 # Setup Logging
 logger = logging.getLogger(__name__)
@@ -216,6 +217,21 @@ def search_mlb_rosters(team_name:str = None,
 
     return results
 
+
+sse_app = mcp.sse_app()
+
+@sse_app.route("/health")
+async def health_check(request):
+    """ Health check endpoint for the FastAPI app. """
+    # check database connection
+    db_connection_string = os.environ[ENV_DB_CONNECTION_STRING]
+    with psycopg.connect(db_connection_string) as db_connection:
+        with db_connection.cursor() as db_cursor:
+            db_cursor.execute("select count(*) from field_pos")
+
+    return JSONResponse({"status": "ok"})
+
+
 #search_mlb_rosters(team_name='Braves', year=2023, position = "pitcher", name = "strider")
 #search_mlb_rosters(team_name='Braves', year=2023, position = "pitcher", name = "spencer strider")
 #search_mlb_rosters(team_name='Braves', year=None, position = None, name = "Ozuna")
@@ -228,4 +244,4 @@ if __name__ == "__main__":
     if ENV_MCP_PORT in os.environ:
         port = int(os.environ[ENV_MCP_PORT])
 
-    uvicorn.run(mcp.sse_app(), host="0.0.0.0", port=port)
+    uvicorn.run(sse_app, host="0.0.0.0", port=port)
