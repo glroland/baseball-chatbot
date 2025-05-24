@@ -16,15 +16,17 @@ mcp = FastMCP("MLB Baseball Teams MCP Server")
 
 @mcp.tool(
     annotations={
-        "title": "Search for a Major League Baseball team using the information provided.  At least one field must be provided.",
+        "title": "Search for Major League Baseball teams",
         "readOnlyHint": True,
         "openWorldHint": True,
     }
 )
 def find_mlb_baseball_teams(team_name:str = None, city:str = None, year:int = None, league:str = None) -> List[Dict[str, Any]]:
-    """ Gets information about a major leage baseball team using the provided search criteria.
-
-    At least one search parameter must be provided.
+    """ Search for a Major League Baseball teams using the information provided.
+    
+    At least one field must be provided.  
+    
+    No assumptions should be made about the year.  Leave it blank when not explicitly provided by the user.
 
     :param team_name: Name of the team (optional)
     :param city: City name / location of the team (optional)
@@ -113,7 +115,7 @@ def convert_hand_code_to_description(hand_code):
 
 @mcp.tool(
     annotations={
-        "title": "Search the Major League Baseball team rosters using the information provided.  At least one field must be provided.",
+        "title": "Search Major League Baseball team rosters",
         "readOnlyHint": True,
         "openWorldHint": True,
     }
@@ -125,6 +127,8 @@ def search_mlb_rosters(team_name:str = None,
     """ Search the Major League Baseball team rosters using the information provided.
 
     At least one search parameter must be provided.
+
+    No assumptions should be made about the year.  Leave it blank when not explicitly provided by the user.
 
     :param team_name: Name of the team (optional)
     :param year: Season in which to search for (optional)
@@ -216,7 +220,7 @@ def search_mlb_rosters(team_name:str = None,
 #search_mlb_rosters(team_name='Braves', year=2023, position = "pitcher", name = "spencer strider")
 #search_mlb_rosters(team_name='Braves', year=None, position = None, name = "Ozuna")
 #search_mlb_rosters(team_name='Atlanta Braves', year=None, position = None, name = "Ozuna")
-search_mlb_rosters(team_name=None, year=None, position = "Pitcher", name = "Chris Sale")
+#search_mlb_rosters(team_name=None, year=None, position = "Pitcher", name = "Chris Sale")
 
 
 if __name__ == "__main__":
