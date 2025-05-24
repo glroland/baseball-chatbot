@@ -6,8 +6,8 @@ metadata:
     {{- include "baseball-chatbot.labels" . | nindent 4 }}
 immutable: false
 data:
-  LLAMA_STACK_URL: "https://my-llama-stack-my-llama-stack.apps.ocp.home.glroland.com"
+  LLAMA_STACK_URL: "https://{{ .Release.Name }}-my-llama-stack.apps.ocp.home.glroland.com"
   LLAMA_STACK_MODEL: "meta-llama/Llama-3.2-11B-Vision-Instruct"
   EMBEDDING_MODEL: "sentence-transformers/all-MiniLM-L6-v2"
-  AGENT_WEATHER_URL: "http://baseball-chatbot-agent-weather.baseball-chatbot.svc:8080/sse"
-  AGENT_TEAM_URL: "http://baseball-chatbot-agent-team.baseball-chatbot.svc:8080/sse"
+  AGENT_WEATHER_URL: "http://{{ .Release.Name }}-agent-weather.baseball-chatbot.svc:8080/sse"
+  AGENT_TEAM_URL: "http://{{ .Release.Name }}-agent-team.baseball-chatbot.svc:8080/sse"
