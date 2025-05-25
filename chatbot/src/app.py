@@ -9,28 +9,8 @@ from constants import AppUserInterfaceElements
 from constants import CannedGreetings
 from constants import MessageAttributes
 from constants import AGENT_SYSTEM_PROMPT
-from lls_gateway import lls_connect, lls_create_agent, lls_new_session, get_lls_model_name
+from lls_gateway import lls_connect, lls_create_agent, lls_new_session, lls_streaming_turn_response_generator
 from tools import setup_tools, BASEBALL_CHAT_AGENTS
-
-
-def response_generator(turn_response):
-    for response in turn_response:
-        if hasattr(response.event, "payload"):
-            print(response.event.payload)
-            if response.event.payload.event_type == "step_progress":
-                if hasattr(response.event.payload.delta, "text"):
-                    yield response.event.payload.delta.text
-            if response.event.payload.event_type == "step_complete":
-                if response.event.payload.step_details.step_type == "tool_execution":
-                    if response.event.payload.step_details.tool_calls:
-                        tool_name = str(response.event.payload.step_details.tool_calls[0].tool_name)
-                        yield f'\n\n🛠 :grey[_Using "{tool_name}" tool:_]\n\n'
-                    else:
-                        yield "No tool_calls present in step_details"
-        else:
-            yield f"Error occurred in the Llama Stack Cluster: {response}"
-
-
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +87,7 @@ if user_input := st.chat_input():
     # Capture streaming response
     ai_response = ""
     with messages.chat_message(MessageAttributes.ASSISTANT):
-        ai_response = st.write_stream(response_generator(response))
+        ai_response = st.write_stream(lls_streaming_turn_response_generator(response))
 
     # Get AI Response to Latest Inquiry
     logger.info ("AI Response Message: %s", ai_response)

@@ -113,3 +113,20 @@ def lls_new_session(llama_stack_agent : Agent, session_name : str = "My conversa
     logger.info("Session Created.  Session ID=%s", session_id)
 
     return session_id
+
+def lls_streaming_turn_response_generator(turn_response):
+    for response in turn_response:
+        if hasattr(response.event, "payload"):
+            print(response.event.payload)
+            if response.event.payload.event_type == "step_progress":
+                if hasattr(response.event.payload.delta, "text"):
+                    yield response.event.payload.delta.text
+            if response.event.payload.event_type == "step_complete":
+                if response.event.payload.step_details.step_type == "tool_execution":
+                    if response.event.payload.step_details.tool_calls:
+                        tool_name = str(response.event.payload.step_details.tool_calls[0].tool_name)
+                        yield f'\n\n🛠 :grey[_Using "{tool_name}" tool:_]\n\n'
+                    else:
+                        yield "No tool_calls present in step_details"
+        else:
+            yield f"Error occurred in the Llama Stack Cluster: {response}"
