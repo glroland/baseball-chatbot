@@ -14,8 +14,12 @@ class SessionStateVariables:
 class AppUserInterfaceElements:
     """ Application UI Elements """
 
+    TITLE = "MLB Chatbot"
+
     BASEBALL_ICON = "⚾"
-    TITLE = BASEBALL_ICON + " MLB Chatbot " + BASEBALL_ICON
+    HEADER = BASEBALL_ICON + " MLB Chatbot " + BASEBALL_ICON
+
+    TAB_ICON = "./assets/tab_icon.ico"
 
 # pylint: disable=too-few-public-methods
 class CannedGreetings:

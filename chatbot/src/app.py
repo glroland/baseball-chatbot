@@ -9,7 +9,7 @@ from constants import AppUserInterfaceElements
 from constants import CannedGreetings
 from constants import MessageAttributes
 from constants import AGENT_SYSTEM_PROMPT
-from lls_gateway import lls_connect, lls_create_agent, lls_new_session
+from lls_gateway import lls_connect, lls_create_agent, lls_new_session, get_lls_model_name
 from tools import setup_tools, BASEBALL_CHAT_AGENTS
 
 logger = logging.getLogger(__name__)
@@ -47,7 +47,11 @@ llama_stack_model = st.session_state["llama_stack_model"]
 llama_stack_session_id = st.session_state[SessionStateVariables.SESSION_ID]
 
 # Initialize High Level Page Structure
-st.title(AppUserInterfaceElements.TITLE)
+st.set_page_config(page_title=AppUserInterfaceElements.TITLE,
+                   page_icon=AppUserInterfaceElements.TAB_ICON,
+                   layout="wide")
+with st.columns(3)[1]:
+    st.title(AppUserInterfaceElements.HEADER)
 st.markdown("""
     <style>
         .reportview-container {
@@ -61,7 +65,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Initialize Chat Box
-messages = st.container(height=300)
+messages = st.container(height=400)
 messages.chat_message(MessageAttributes.ASSISTANT).write(CannedGreetings.INTRO)
 for msg in st.session_state.messages:
     messages.chat_message(msg[MessageAttributes.ROLE]).write(msg[MessageAttributes.CONTENT])
@@ -74,17 +78,33 @@ if user_input := st.chat_input():
     logger.info ("st.session_state.messages - %s", st.session_state.messages)
 
     # Invoke Backend API
-    response = llama_stack_agent.create_turn(
-        session_id=llama_stack_session_id,
-        messages=[{"role":"user", "content":user_input}],
-        stream=False
+    response = llama_stack_client.inference.chat_completion(
+        messages=[
+            {"role": "system", "content": AGENT_SYSTEM_PROMPT},
+            {"role": "user", "content": user_input},
+        ],
+        model_id=get_lls_model_name(),
+        stream=True,
+#        tool_choice="auto",
+#        tools=BASEBALL_CHAT_AGENTS,
     )
 
+    # Capture streaming response
+    ai_response = ""
+    with messages.chat_message(MessageAttributes.ASSISTANT):
+        placeholder = st.empty()
+        for chunk in response:
+            if chunk.event.event_type == "progress":
+                ai_response += chunk.event.delta.text
+            placeholder.markdown(ai_response) # + "▌")
+ 
     # Get AI Response to Latest Inquiry
-    ai_response = response.output_message.content
     logger.info ("AI Response Message: %s", ai_response)
 
     # Append AI Response to history
-    st.session_state.messages.append({MessageAttributes.ROLE: MessageAttributes.ASSISTANT,
-                                    MessageAttributes.CONTENT: ai_response})
-    messages.chat_message(MessageAttributes.ASSISTANT).write(ai_response)
+    st.session_state.messages.append(
+        {
+            MessageAttributes.ROLE: MessageAttributes.ASSISTANT,
+            MessageAttributes.CONTENT: ai_response
+        }
+    )
