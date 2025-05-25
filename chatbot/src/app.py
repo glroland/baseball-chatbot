@@ -14,7 +14,7 @@ from tools import setup_tools, BASEBALL_CHAT_AGENTS
 
 logger = logging.getLogger(__name__)
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
     handlers=[
         # no need from a docker container - logging.FileHandler("baseball-chatbot.log"),
         logging.StreamHandler()
