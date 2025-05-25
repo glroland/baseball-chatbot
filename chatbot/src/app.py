@@ -12,6 +12,26 @@ from constants import AGENT_SYSTEM_PROMPT
 from lls_gateway import lls_connect, lls_create_agent, lls_new_session, get_lls_model_name
 from tools import setup_tools, BASEBALL_CHAT_AGENTS
 
+
+def response_generator(turn_response):
+    for response in turn_response:
+        if hasattr(response.event, "payload"):
+            print(response.event.payload)
+            if response.event.payload.event_type == "step_progress":
+                if hasattr(response.event.payload.delta, "text"):
+                    yield response.event.payload.delta.text
+            if response.event.payload.event_type == "step_complete":
+                if response.event.payload.step_details.step_type == "tool_execution":
+                    if response.event.payload.step_details.tool_calls:
+                        tool_name = str(response.event.payload.step_details.tool_calls[0].tool_name)
+                        yield f'\n\n🛠 :grey[_Using "{tool_name}" tool:_]\n\n'
+                    else:
+                        yield "No tool_calls present in step_details"
+        else:
+            yield f"Error occurred in the Llama Stack Cluster: {response}"
+
+
+
 logger = logging.getLogger(__name__)
 
 logging.basicConfig(level=logging.DEBUG,
@@ -78,26 +98,17 @@ if user_input := st.chat_input():
     logger.info ("st.session_state.messages - %s", st.session_state.messages)
 
     # Invoke Backend API
-    response = llama_stack_client.inference.chat_completion(
-        messages=[
-            {"role": "system", "content": AGENT_SYSTEM_PROMPT},
-            {"role": "user", "content": user_input},
-        ],
-        model_id=get_lls_model_name(),
-        stream=True,
-#        tool_choice="auto",
-#        tools=BASEBALL_CHAT_AGENTS,
+    response = llama_stack_agent.create_turn(
+        session_id=llama_stack_session_id,
+        messages=[{"role":"user", "content": user_input}],
+        stream=True
     )
 
     # Capture streaming response
     ai_response = ""
     with messages.chat_message(MessageAttributes.ASSISTANT):
-        placeholder = st.empty()
-        for chunk in response:
-            if chunk.event.event_type == "progress":
-                ai_response += chunk.event.delta.text
-            placeholder.markdown(ai_response) # + "▌")
- 
+        ai_response = st.write_stream(response_generator(response))
+
     # Get AI Response to Latest Inquiry
     logger.info ("AI Response Message: %s", ai_response)
 
