@@ -117,7 +117,7 @@ def lls_new_session(llama_stack_agent : Agent, session_name : str = "My conversa
 def lls_streaming_turn_response_generator(turn_response):
     for response in turn_response:
         if hasattr(response.event, "payload"):
-            print("PAYLOAD:", response.event.payload)
+#            print("PAYLOAD:", response.event.payload)
             if response.event.payload.event_type == "step_progress":
                 if hasattr(response.event.payload.delta, "text"):
                     yield response.event.payload.delta.text
