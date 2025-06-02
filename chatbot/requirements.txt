@@ -4,3 +4,5 @@ streamlit
 watchdog
 requests
 llama-stack-client
+fire
+
