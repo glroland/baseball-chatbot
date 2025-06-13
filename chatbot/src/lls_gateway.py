@@ -8,6 +8,7 @@ import logging
 from typing import Tuple, List
 from llama_stack_client import LlamaStackClient, Agent, BaseModel
 from llama_stack_client.types.shared_params.agent_config import ToolConfig, AgentConfig
+from llama_stack_client.types.shared_params.sampling_params import SamplingParams
 
 logger = logging.getLogger(__name__)
 
@@ -84,12 +85,20 @@ def lls_create_agent(llama_stack_client : LlamaStackClient,
 
     # Create the agent
     logger.info("Creating agent...")
+    sampling_params = SamplingParams(max_tokens=1000,
+                                    repetition_penalty=1.1,
+                                    strategy={
+                                        "type": "top_p",
+                                        "temperature": 0.1,
+                                        "top_p": 0.1
+                                    })
     agent_config = AgentConfig(tool_choice="auto",
                                tool_config=ToolConfig(tool_choice = "auto"),
                                toolgroups=tools_list,
                                model=llama_stack_model_name,
                                instructions=prompt,
                                enable_session_persistence=True,
+                               sampling_params=sampling_params,
                                max_infer_iters=10)
 
     llama_stack_agent = Agent(
