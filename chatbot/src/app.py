@@ -9,8 +9,13 @@ from constants import AppUserInterfaceElements
 from constants import CannedGreetings
 from constants import MessageAttributes
 from constants import AGENT_SYSTEM_PROMPT
-from lls_gateway import lls_connect, lls_create_agent, lls_new_session, lls_streaming_turn_response_generator
-from tools import setup_tools, BASEBALL_CHAT_AGENTS
+from lls_gateway import lls_connect
+from lls_gateway import lls_create_agent
+from lls_gateway import lls_new_session
+from lls_gateway import lls_streaming_turn_response_generator
+from lls_gateway import get_all_lls_model_names
+from tools import BASEBALL_CHAT_AGENTS
+from tools import setup_tools
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +32,7 @@ if SessionStateVariables.MESSAGES not in st.session_state:
     # Connect to LLama Stack
     logger.info("Initializing LLama Stack")
     llama_stack_client, llama_stack_model = lls_connect()
+    llama_stack_all_models = get_all_lls_model_names(llama_stack_client)
     setup_tools(llama_stack_client)
     llama_stack_agent = lls_create_agent(llama_stack_client, AGENT_SYSTEM_PROMPT, BASEBALL_CHAT_AGENTS)
     logger.info("LLama Stack Initialized")
@@ -35,6 +41,7 @@ if SessionStateVariables.MESSAGES not in st.session_state:
     st.session_state["llama_stack_client"] = llama_stack_client
     st.session_state["llama_stack_agent"] = llama_stack_agent
     st.session_state["llama_stack_model"] = llama_stack_model
+    st.session_state["llama_stack_all_models"] = llama_stack_all_models
 
     # Start session
     llama_stack_session_id = lls_new_session(llama_stack_agent)
@@ -45,6 +52,7 @@ llama_stack_client = st.session_state["llama_stack_client"]
 llama_stack_agent = st.session_state["llama_stack_agent"]
 llama_stack_model = st.session_state["llama_stack_model"]
 llama_stack_session_id = st.session_state[SessionStateVariables.SESSION_ID]
+llama_stack_all_models = st.session_state["llama_stack_all_models"]
 
 # Initialize High Level Page Structure
 st.set_page_config(page_title=AppUserInterfaceElements.TITLE,
@@ -69,6 +77,13 @@ st.markdown("""
     """, unsafe_allow_html=True)
 with col1:
     st.image("assets/header.png")
+with col2:
+    index = llama_stack_all_models.index(llama_stack_model.identifier)
+    option = st.selectbox(
+        "Model:",
+        llama_stack_all_models,
+        index=index
+    )
 
 # Initialize Chat Box
 messages = st.container(height=400)

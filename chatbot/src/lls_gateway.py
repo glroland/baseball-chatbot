@@ -15,6 +15,22 @@ logger = logging.getLogger(__name__)
 ENV_LLAMA_STACK_URL = "LLAMA_STACK_URL"
 ENV_LLAMA_STACK_MODEL = "LLAMA_STACK_MODEL"
 
+def get_all_lls_model_names(llama_stack_client : LlamaStackClient) -> List[str]:
+    """ Gets a list of all configured models available in the LLama Stack runtime.
+
+        llama_stack_client - llama stack client instance
+
+        Returns: list of model names
+    """
+    lls_models = llama_stack_client.models.list()
+
+    response_list = []
+    for model in lls_models:
+        print (model)
+        if model.api_model_type == "llm":
+            response_list.append(model.identifier)
+    return response_list
+
 def get_lls_model_name() -> str:
     """ Gets the configured LLama Stack model name to use.
     
