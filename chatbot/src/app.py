@@ -50,19 +50,25 @@ llama_stack_session_id = st.session_state[SessionStateVariables.SESSION_ID]
 st.set_page_config(page_title=AppUserInterfaceElements.TITLE,
                    page_icon=AppUserInterfaceElements.TAB_ICON,
                    layout="wide")
-with st.columns(3)[1]:
-    st.title(AppUserInterfaceElements.HEADER)
 st.markdown("""
     <style>
-        .reportview-container {
-            margin-top: -2em;
-        }
-        #MainMenu {visibility: hidden;}
-        .stDeployButton {display:none;}
-        footer {visibility: hidden;}
-        #stDecoration {display:none;}
+        .stAppHeader {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
+col1, col2 = st.columns(2, vertical_alignment="center")
+st.markdown("""
+    <style>
+        div[data-testid="column"] {
+            width: fit-content !important;
+            flex: unset;
+        }
+        div[data-testid="column"] * {
+            width: fit-content !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+with col1:
+    st.image("assets/header.png")
 
 # Initialize Chat Box
 messages = st.container(height=400)

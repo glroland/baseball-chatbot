@@ -33,7 +33,7 @@ class AppUserInterfaceElements:
     TITLE = "MLB Chatbot"
 
     BASEBALL_ICON = "⚾"
-    HEADER = BASEBALL_ICON + " MLB Chatbot " + BASEBALL_ICON
+    HEADER = "Major&nbsp;League&nbsp;Baseball"# + BASEBALL_ICON
 
     TAB_ICON = "./assets/tab_icon.ico"
 
