@@ -68,13 +68,13 @@ def on_model_select_change():
         llama_stack_model = st.session_state["llama_stack_model"]
 
         # recreate agent
+        st.session_state[SessionStateVariables.MESSAGES] = []
         llama_stack_agent = lls_create_agent(llama_stack_client, llama_stack_model, AGENT_SYSTEM_PROMPT, BASEBALL_CHAT_AGENTS)
         st.session_state["llama_stack_agent"] = llama_stack_agent
 
         # create a new session
         llama_stack_session_id = lls_new_session(llama_stack_agent)
         st.session_state[SessionStateVariables.SESSION_ID] = llama_stack_session_id
-        st.session_state[SessionStateVariables.MESSAGES] = []
 
 # Initialize High Level Page Structure
 st.set_page_config(page_title=AppUserInterfaceElements.TITLE,
