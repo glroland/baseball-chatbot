@@ -81,6 +81,7 @@ def lls_connect() -> Tuple[LlamaStackClient, BaseModel]:
     return llama_stack_client, llama_stack_model
 
 def lls_create_agent(llama_stack_client : LlamaStackClient,
+                     model_name : str,
                      prompt : str,
                      tools_list : List[str]) -> Agent:
     """ Creates an Agent with access to the provided tools.
@@ -92,9 +93,10 @@ def lls_create_agent(llama_stack_client : LlamaStackClient,
         raise ValueError("llama_stack_client is required and cannot be empty.")
     if prompt is None or len(prompt) == 0:
         raise ValueError("prompt is required and cannot be empty.")
+    if model_name is None or len(model_name) == 0:
+        raise ValueError("model_name is required and cannot be empty")
 
     # get configuration
-    llama_stack_model_name = get_lls_model_name()
     if llama_stack_client is None:
         logger.warning("tools_list is None instead of an empty array")
         llama_stack_client = []
@@ -111,7 +113,7 @@ def lls_create_agent(llama_stack_client : LlamaStackClient,
     agent_config = AgentConfig(tool_choice="auto",
                                tool_config=ToolConfig(tool_choice = "auto"),
                                toolgroups=tools_list,
-                               model=llama_stack_model_name,
+                               model=model_name,
                                instructions=prompt,
                                enable_session_persistence=True,
                                sampling_params=sampling_params,

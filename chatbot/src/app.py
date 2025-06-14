@@ -14,6 +14,7 @@ from lls_gateway import lls_create_agent
 from lls_gateway import lls_new_session
 from lls_gateway import lls_streaming_turn_response_generator
 from lls_gateway import get_all_lls_model_names
+from lls_gateway import get_lls_model_name
 from tools import BASEBALL_CHAT_AGENTS
 from tools import setup_tools
 
@@ -34,7 +35,8 @@ if SessionStateVariables.MESSAGES not in st.session_state:
     llama_stack_client, llama_stack_model = lls_connect()
     llama_stack_all_models = get_all_lls_model_names(llama_stack_client)
     setup_tools(llama_stack_client)
-    llama_stack_agent = lls_create_agent(llama_stack_client, AGENT_SYSTEM_PROMPT, BASEBALL_CHAT_AGENTS)
+    llama_stack_model_name = get_lls_model_name()
+    llama_stack_agent = lls_create_agent(llama_stack_client, llama_stack_model_name, AGENT_SYSTEM_PROMPT, BASEBALL_CHAT_AGENTS)
     logger.info("LLama Stack Initialized")
 
     # Save LLama Stack Connection Info
