@@ -26,6 +26,10 @@ logging.basicConfig(level=logging.INFO,
         logging.StreamHandler()
     ])
 
+# Called on a Model Select value change
+def on_model_select_change():
+    pass
+
 # Initialize Streamlit State
 if SessionStateVariables.MESSAGES not in st.session_state:
     st.session_state[SessionStateVariables.MESSAGES] = []
@@ -83,8 +87,9 @@ with col2:
     index = llama_stack_all_models.index(llama_stack_model.identifier)
     option = st.selectbox(
         "Model:",
-        llama_stack_all_models,
-        index=index
+        options=llama_stack_all_models,
+        index=index,
+        on_change=on_model_select_change
     )
 
 # Initialize Chat Box
