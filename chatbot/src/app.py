@@ -26,10 +26,6 @@ logging.basicConfig(level=logging.INFO,
         logging.StreamHandler()
     ])
 
-# Called on a Model Select value change
-def on_model_select_change():
-    pass
-
 # Initialize Streamlit State
 if SessionStateVariables.MESSAGES not in st.session_state:
     st.session_state[SessionStateVariables.MESSAGES] = []
@@ -46,7 +42,7 @@ if SessionStateVariables.MESSAGES not in st.session_state:
     # Save LLama Stack Connection Info
     st.session_state["llama_stack_client"] = llama_stack_client
     st.session_state["llama_stack_agent"] = llama_stack_agent
-    st.session_state["llama_stack_model"] = llama_stack_model
+    st.session_state["llama_stack_model"] = llama_stack_model.identifier
     st.session_state["llama_stack_all_models"] = llama_stack_all_models
 
     # Start session
@@ -59,6 +55,26 @@ llama_stack_agent = st.session_state["llama_stack_agent"]
 llama_stack_model = st.session_state["llama_stack_model"]
 llama_stack_session_id = st.session_state[SessionStateVariables.SESSION_ID]
 llama_stack_all_models = st.session_state["llama_stack_all_models"]
+
+# Called on a Model Select value change
+def on_model_select_change():
+    new_model = st.session_state.selected_model_key
+    llama_stack_model = st.session_state["llama_stack_model"]
+    if new_model != llama_stack_model:
+        print (f"MODEL CHANGED: From {llama_stack_model} to {new_model}")
+
+        # update model in state
+        st.session_state["llama_stack_model"] = new_model
+        llama_stack_model = st.session_state["llama_stack_model"]
+
+        # recreate agent
+        llama_stack_agent = lls_create_agent(llama_stack_client, llama_stack_model, AGENT_SYSTEM_PROMPT, BASEBALL_CHAT_AGENTS)
+        st.session_state["llama_stack_agent"] = llama_stack_agent
+
+        # create a new session
+        llama_stack_session_id = lls_new_session(llama_stack_agent)
+        st.session_state[SessionStateVariables.SESSION_ID] = llama_stack_session_id
+        st.session_state[SessionStateVariables.MESSAGES] = []
 
 # Initialize High Level Page Structure
 st.set_page_config(page_title=AppUserInterfaceElements.TITLE,
@@ -84,11 +100,12 @@ st.markdown("""
 with col1:
     st.image("assets/header.png")
 with col2:
-    index = llama_stack_all_models.index(llama_stack_model.identifier)
+    index = llama_stack_all_models.index(llama_stack_model)
     option = st.selectbox(
         "Model:",
         options=llama_stack_all_models,
         index=index,
+        key="selected_model_key",
         on_change=on_model_select_change
     )
 
