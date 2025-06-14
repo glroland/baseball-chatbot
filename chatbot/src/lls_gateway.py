@@ -104,7 +104,7 @@ def lls_create_agent(llama_stack_client : LlamaStackClient,
     # Create the agent
     logger.info("Creating agent...")
     sampling_params = SamplingParams(max_tokens=1000,
-                                    repetition_penalty=1.1,
+#                                    repetition_penalty=1.1,
                                     strategy={
                                         "type": "top_p",
                                         "temperature": 0.1,
