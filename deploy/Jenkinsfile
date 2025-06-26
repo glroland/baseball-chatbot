@@ -38,7 +38,7 @@ pipeline
       {
          steps 
          {
-            sh 'cd agent-game ; docker build . --tag agent-team:$BUILD_NUMBER'
+            sh 'cd agent-game ; docker build . --tag agent-game:$BUILD_NUMBER'
             sh 'cd agent-game ; docker save agent-game:$BUILD_NUMBER > agent-game-dockerimage.tar'
             step(followSymlinks: false, artifacts: 'agent-game/agent-game-dockerimage.tar', $class: 'ArtifactArchiver')
             sh 'cd agent-game ; docker rmi agent-game:$BUILD_NUMBER'
