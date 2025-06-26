@@ -1,0 +1,6 @@
+pytest
+pylint
+llama-stack-client
+pybaseball
+mcp[cli]
+psycopg[binary]
