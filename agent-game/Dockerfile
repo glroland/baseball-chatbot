@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/python-311:9.5-1745945598
+FROM registry.access.redhat.com/ubi9/python-311:9.6-1750969934
 
 # Configurable variables
 ENV DB_CONNECTION_STRING "postgresql://baseball_app:baseball123@db.home.glroland.com:5432/baseball_db"
