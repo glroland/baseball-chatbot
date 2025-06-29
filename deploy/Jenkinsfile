@@ -45,14 +45,14 @@ pipeline
          }
       }
 
-      stage('Create Docker Image for agent-weather') 
+      stage('Create Docker Image for agent-utilities') 
       {
          steps 
          {
-            sh 'cd agent-weather ; docker build . --tag agent-weather:$BUILD_NUMBER'
-            sh 'cd agent-weather ; docker save agent-weather:$BUILD_NUMBER > agent-weather-dockerimage.tar'
-            step(followSymlinks: false, artifacts: 'agent-weather/agent-weather-dockerimage.tar', $class: 'ArtifactArchiver')
-            sh 'cd agent-weather ; docker rmi agent-weather:$BUILD_NUMBER'
+            sh 'cd agent-utilities ; docker build . --tag agent-utilities:$BUILD_NUMBER'
+            sh 'cd agent-utilities ; docker save agent-utilities:$BUILD_NUMBER > agent-utilities-dockerimage.tar'
+            step(followSymlinks: false, artifacts: 'agent-utilities/agent-utilities-dockerimage.tar', $class: 'ArtifactArchiver')
+            sh 'cd agent-utilities ; docker rmi agent-utilities:$BUILD_NUMBER'
          }
       }
 
@@ -87,11 +87,11 @@ pipeline
                   sh 'docker push registry.home.glroland.com/baseball/agent-game:$BUILD_NUMBER'
                   sh 'docker rmi registry.home.glroland.com/baseball/agent-game:$BUILD_NUMBER'
                
-                  sh 'docker load -i agent-weather/agent-weather-dockerimage.tar'
-                  sh 'docker tag agent-weather:$BUILD_NUMBER registry.home.glroland.com/baseball/agent-weather:$BUILD_NUMBER'
-                  sh 'docker rmi agent-weather:$BUILD_NUMBER'
-                  sh 'docker push registry.home.glroland.com/baseball/agent-weather:$BUILD_NUMBER'
-                  sh 'docker rmi registry.home.glroland.com/baseball/agent-weather:$BUILD_NUMBER'
+                  sh 'docker load -i agent-utilities/agent-utilities-dockerimage.tar'
+                  sh 'docker tag agent-utilities:$BUILD_NUMBER registry.home.glroland.com/baseball/agent-utilities:$BUILD_NUMBER'
+                  sh 'docker rmi agent-utilities:$BUILD_NUMBER'
+                  sh 'docker push registry.home.glroland.com/baseball/agent-utilities:$BUILD_NUMBER'
+                  sh 'docker rmi registry.home.glroland.com/baseball/agent-utilities:$BUILD_NUMBER'
                
                   sh 'docker load -i chatbot/chatbot-dockerimage.tar'
                   sh 'docker tag chatbot:$BUILD_NUMBER registry.home.glroland.com/baseball/chatbot:$BUILD_NUMBER'

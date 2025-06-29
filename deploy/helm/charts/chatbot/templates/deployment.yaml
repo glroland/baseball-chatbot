@@ -56,11 +56,11 @@ spec:
                 configMapKeyRef:
                   name: {{ include "baseball-chatbot.fullname" . }}
                   key: EMBEDDING_MODEL
-            - name: AGENT_WEATHER_URL
+            - name: AGENT_UTILITIES_URL
               valueFrom:
                 configMapKeyRef:
                   name: {{ include "baseball-chatbot.fullname" . }}
-                  key: AGENT_WEATHER_URL
+                  key: AGENT_UTILITIES_URL
             - name: AGENT_TEAM_URL
               valueFrom:
                 configMapKeyRef:

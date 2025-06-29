@@ -1,6 +1,6 @@
 apiVersion: v2
-name: agent-weather
-description: Weather Agent
+name: agent-utilities
+description: Utilities Agent
 
 # A chart can be either an 'application' or a 'library' chart.
 #

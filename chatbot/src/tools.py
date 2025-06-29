@@ -1,14 +1,14 @@
 import os
 import logging
 
-ENV_AGENT_WEATHER_URL = "AGENT_WEATHER_URL"
+ENV_AGENT_UTILITIES_URL = "AGENT_UTILITIES_URL"
 ENV_AGENT_TEAM_URL = "AGENT_TEAM_URL"
 ENV_AGENT_GAME_URL = "AGENT_GAME_URL"
 
 BASEBALL_AGENT_TEAM = "agent-team"
-BASEBALL_AGENT_WEATHER = "agent-weather"
+BASEBALL_AGENT_UTILITIES = "agent-utilities"
 BASEBALL_AGENT_GAME = "agent-game"
-BASEBALL_CHAT_AGENTS = [BASEBALL_AGENT_TEAM, BASEBALL_AGENT_WEATHER, BASEBALL_AGENT_GAME]
+BASEBALL_CHAT_AGENTS = [BASEBALL_AGENT_TEAM, BASEBALL_AGENT_UTILITIES, BASEBALL_AGENT_GAME]
 
 logger = logging.getLogger(__name__)
 
@@ -52,12 +52,12 @@ def setup_tools(llama_stack_client):
         raise ValueError(msg)
     agent_game_url = os.environ[ENV_AGENT_GAME_URL]
     logger.info("Game Agent URL: %s", agent_game_url)
-    if not ENV_AGENT_WEATHER_URL in os.environ:
-        msg = "Weather Agent URL is required and cannot be empty!"
+    if not ENV_AGENT_UTILITIES_URL in os.environ:
+        msg = "Utilities Agent URL is required and cannot be empty!"
         logger.error(msg)
         raise ValueError(msg)
-    agent_weather_url = os.environ[ENV_AGENT_WEATHER_URL]
-    logger.info("Weather Agent URL: %s", agent_weather_url)
+    agent_utilities_url = os.environ[ENV_AGENT_UTILITIES_URL]
+    logger.info("Utilities Agent URL: %s", agent_utilities_url)
 
     # Get registered tool groups
     all_toolgroups = llama_stack_client.toolgroups.list()
@@ -67,4 +67,4 @@ def setup_tools(llama_stack_client):
     # Register agents
     register_mcp_tool(llama_stack_client, all_toolgroups, BASEBALL_AGENT_TEAM, agent_team_url)
     register_mcp_tool(llama_stack_client, all_toolgroups, BASEBALL_AGENT_GAME, agent_game_url)
-    register_mcp_tool(llama_stack_client, all_toolgroups, BASEBALL_AGENT_WEATHER, agent_weather_url)
+    register_mcp_tool(llama_stack_client, all_toolgroups, BASEBALL_AGENT_UTILITIES, agent_utilities_url)

@@ -1,6 +1,7 @@
 import os
 import logging
 import dateparser
+from datetime import timedelta, datetime
 import uvicorn
 from mcp.server.fastmcp import FastMCP
 from starlette.responses import JSONResponse
@@ -23,7 +24,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Start MCP Server
-mcp = FastMCP(name="Weather MCP Server")
+mcp = FastMCP(name="Utilities MCP Server")
 
 @mcp.tool(
     annotations={
@@ -52,7 +53,7 @@ def get_temperature_on_past_date(location: str, date: str = None) -> float:
         raise ValueError(msg)
 
     # get latitude and longitude for location
-    geolocator = Nominatim(user_agent="agent-weather")
+    geolocator = Nominatim(user_agent="agent-utilities")
     geo_location = geolocator.geocode(location)
     latitude = geo_location.latitude
     longitude = geo_location.longitude
@@ -60,7 +61,9 @@ def get_temperature_on_past_date(location: str, date: str = None) -> float:
 
     # Setup the Open-Meteo API client with cache and retry on error
     logger.debug("Setting up cache and retries for weather.")
-    cache_session = requests_cache.CachedSession('.weather-cache', expire_after = -1, use_temp=True)
+    cache_session = requests_cache.CachedSession('.weather-cache',
+                                                 expire_after = timedelta(hours=1),
+                                                 use_temp=True)
     retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
     openmeteo = openmeteo_requests.Client(session = retry_session)
 
@@ -119,7 +122,7 @@ def get_current_temperature(location: str) -> float:
         raise ValueError(msg)
 
     # get latitude and longitude for location
-    geolocator = Nominatim(user_agent="agent-weather")
+    geolocator = Nominatim(user_agent="agent-utilities")
     geo_location = geolocator.geocode(location)
     latitude = geo_location.latitude
     longitude = geo_location.longitude
@@ -127,7 +130,9 @@ def get_current_temperature(location: str) -> float:
 
     # Setup the Open-Meteo API client with cache and retry on error
     logger.debug("Setting up cache and retries for weather.")
-    cache_session = requests_cache.CachedSession('.weather-cache', expire_after = -1, use_temp=True)
+    cache_session = requests_cache.CachedSession('.weather-cache',
+                                                 expire_after = timedelta(hours=1),
+                                                 use_temp=True)
     retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
     openmeteo = openmeteo_requests.Client(session = retry_session)
 
@@ -155,6 +160,25 @@ def get_current_temperature(location: str) -> float:
     print ("Temp at", location, "is currently", temp)
     return temp
 
+@mcp.tool(
+    annotations={
+        "title": "Get the Current Date and Time",
+        "readOnlyHint": True,
+        "openWorldHint": True,
+    }
+)
+def get_current_date_and_time() -> datetime:
+    """ Gets the current date and time.
+    """
+    logger.info ("Getting current date and time.")
+
+    # Return current date and time
+    current_date_and_time = datetime.now()
+
+    logger.info("Current Date and Time: %s", current_date_and_time)
+    print ("Current Date and Time is ", current_date_and_time)
+    return current_date_and_time
+
 
 sse_app = mcp.sse_app()
 
@@ -176,6 +200,10 @@ if __name__ == "__main__":
 
     print ("Testing get_temperature_on_past_date....")
     print (get_temperature_on_past_date(location="Atlanta", date="2-1-2025"))
+    print ()
+
+    print ("Testing get_current_date_and_time...")
+    print (get_current_date_and_time())
     print ()
 
     log_level = "info"

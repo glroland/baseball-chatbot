@@ -9,6 +9,6 @@ data:
   LLAMA_STACK_URL: "http://my-llama-stack.my-llama-stack.svc:8080"
   LLAMA_STACK_MODEL: "meta-llama/Llama-3.3-70B-Instruct"
   EMBEDDING_MODEL: "sentence-transformers/all-MiniLM-L6-v2"
-  AGENT_WEATHER_URL: "http://{{ .Release.Name }}-agent-weather.baseball-chatbot.svc:8080/sse"
+  AGENT_UTILITIES_URL: "http://{{ .Release.Name }}-agent-utilities.baseball-chatbot.svc:8080/sse"
   AGENT_TEAM_URL: "http://{{ .Release.Name }}-agent-team.baseball-chatbot.svc:8080/sse"
   AGENT_GAME_URL: "http://{{ .Release.Name }}-agent-game.baseball-chatbot.svc:8080/sse"
