@@ -1,10 +1,10 @@
-#LLAMA_STACK_URL := https://my-llama-stack-my-llama-stack.apps.ocp.home.glroland.com
+LLAMA_STACK_URL := https://my-llama-stack-my-llama-stack.apps.ocp.home.glroland.com
 #LLAMA_STACK_URL := http://envision:8321
-LLAMA_STACK_URL := http://localhost:8321
-LLAMA_STACK_MODEL := ollama/llama3.1:8b
-#LLAMA_STACK_MODEL := meta-llama/Llama-3.3-70B-Instruct
+#LLAMA_STACK_URL := http://localhost:8321
+#LLAMA_STACK_MODEL := ollama/llama3.1:8b
+LLAMA_STACK_MODEL := meta-llama/Llama-3.3-70B-Instruct
 #LLAMA_STACK_MODEL := gpt-4.1-mini
-LLAMA_STACK_MODEL := azure_openai/o4-mini
+#LLAMA_STACK_MODEL := azure_openai/o4-mini
 EMBEDDING_MODEL := text-embedding-3-large
 
 IMAGE_REGISTRY := registry.home.glroland.com/baseball
