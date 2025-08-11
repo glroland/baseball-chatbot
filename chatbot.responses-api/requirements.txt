@@ -1,0 +1,7 @@
+ipykernel
+pylint
+streamlit
+watchdog
+requests
+fire
+openai
