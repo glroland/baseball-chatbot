@@ -7,7 +7,7 @@ import os
 import logging
 import streamlit as st
 from typing import List
-from llama_stack_client import LlamaStackClient, Agent, BaseModel
+from llama_stack_client import LlamaStackClient, Agent
 from llama_stack_client.types.shared_params.agent_config import ToolConfig, AgentConfig
 from llama_stack_client.types.shared_params.sampling_params import SamplingParams
 from gateway import Gateway
@@ -35,7 +35,6 @@ class LLamaStackGateway(Gateway):
 
         response_list = []
         for model in lls_models:
-            print (model)
             if model.api_model_type == "llm":
                 response_list.append(model.identifier)
         return response_list
@@ -55,6 +54,35 @@ class LLamaStackGateway(Gateway):
             new_model_name - new model name
         """
         super().on_model_change(new_model_name)
+    
+        # Create the agent
+        logger.info("Creating agent...  Model=%s", new_model_name)
+        sampling_params = SamplingParams(max_tokens=1000,
+    #                                    repetition_penalty=1.1,
+                                        strategy={
+                                            "type": "top_p",
+                                            "temperature": 0.1,
+                                            "top_p": 0.1
+                                        })
+        agent_config = AgentConfig(tool_choice="auto",
+                                tool_config=ToolConfig(tool_choice = "auto"),
+                                toolgroups=BASEBALL_CHAT_AGENTS,
+                                model=new_model_name,
+                                instructions=AGENT_SYSTEM_PROMPT,
+                                enable_session_persistence=True,
+                                sampling_params=sampling_params,
+                                max_infer_iters=10)
+
+        self.llama_stack_agent = Agent(
+            self.llama_stack_client,
+            agent_config=agent_config,
+        )
+        logger.info("Agent Created.")
+
+        # Create a session
+        logger.info("Starting new session.")
+        self.session_id = self.llama_stack_agent.create_session(session_name="My Conversation")
+        logger.info("Session Created.  Session ID=%s", self.session_id)
 
 
     def process_user_chat(self, user_input: str, placeholder) -> str:
@@ -94,34 +122,8 @@ class LLamaStackGateway(Gateway):
         )
         logger.info("Connected!")
 
-        # Create the agent
-        logger.info("Creating agent...")
-        sampling_params = SamplingParams(max_tokens=1000,
-    #                                    repetition_penalty=1.1,
-                                        strategy={
-                                            "type": "top_p",
-                                            "temperature": 0.1,
-                                            "top_p": 0.1
-                                        })
-        agent_config = AgentConfig(tool_choice="auto",
-                                tool_config=ToolConfig(tool_choice = "auto"),
-                                toolgroups=BASEBALL_CHAT_AGENTS,
-                                model=self.get_selected_model(),
-                                instructions=AGENT_SYSTEM_PROMPT,
-                                enable_session_persistence=True,
-                                sampling_params=sampling_params,
-                                max_infer_iters=10)
-
-        self.llama_stack_agent = Agent(
-            self.llama_stack_client,
-            agent_config=agent_config,
-        )
-        logger.info("Agent Created.")
-
-        # Create a session
-        logger.info("Starting new session.")
-        self.session_id = self.llama_stack_agent.create_session(session_name="My Conversation")
-        logger.info("Session Created.  Session ID=%s", self.session_id)
+        # Initialize agent
+        self.on_model_change(self.get_selected_model())
 
 
     def lls_streaming_turn_response_generator(self, turn_response):
