@@ -24,7 +24,8 @@ class SessionStateVariables:
     """ Session State Variable Names """
 
     MESSAGES = "messages"
-    SESSION_ID = "session_id"
+    MODEL = "model"
+    GATEWAY = "gateway"
 
 # pylint: disable=too-few-public-methods
 class AppUserInterfaceElements:
@@ -43,6 +44,7 @@ class CannedGreetings:
 
     INTRO = "Welcome to the Major League!!!  What may I help you with?"
 
+# pylint: disable=too-few-public-methods
 class MessageAttributes:
     """ LLM APU Message Attributes """
 
@@ -50,3 +52,15 @@ class MessageAttributes:
     USER = "user"
     ASSISTANT = "assistant"
     CONTENT = "content"
+
+# pylint: disable=too-few-public-methods
+class Tools:
+    BASEBALL_AGENT_TEAM = "mcp::agent-team"
+    BASEBALL_AGENT_UTILITIES = "mcp::agent-utilities"
+    BASEBALL_AGENT_GAME = "mcp::agent-game"
+
+    # Temporary addition for Ansible MCP demonstrations
+    #AGENT_ANSIBLE_MCP = "mcp::ansible-mcp"
+
+    ALL = [BASEBALL_AGENT_TEAM, BASEBALL_AGENT_UTILITIES, BASEBALL_AGENT_GAME]
+    #ALL = [BASEBALL_AGENT_TEAM, BASEBALL_AGENT_UTILITIES, BASEBALL_AGENT_GAME, AGENT_ANSIBLE_MCP]

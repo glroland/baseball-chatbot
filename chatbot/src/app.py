@@ -8,15 +8,9 @@ from constants import SessionStateVariables
 from constants import AppUserInterfaceElements
 from constants import CannedGreetings
 from constants import MessageAttributes
-from constants import AGENT_SYSTEM_PROMPT
-from lls_gateway import lls_connect
-from lls_gateway import lls_create_agent
-from lls_gateway import lls_new_session
-from lls_gateway import lls_streaming_turn_response_generator
-from lls_gateway import get_all_lls_model_names
-from lls_gateway import get_lls_model_name
-from tools import BASEBALL_CHAT_AGENTS
-#from tools import setup_tools
+from constants import Tools
+from responses_gateway import ResponsesGateway
+from lls_gateway import LLamaStackGateway
 
 logger = logging.getLogger(__name__)
 
@@ -26,55 +20,46 @@ logging.basicConfig(level=logging.INFO,
         logging.StreamHandler()
     ])
 
+def generate_response(stream):
+    """
+    Extracts the content from the stream of responses from the OpenAI API.
+    Parameters:
+        stream: The stream of responses from the OpenAI API.
+
+    """
+
+    for chunk in stream:
+        delta = chunk.output[0].delta
+        if delta:
+            chunk_content = chunk.output[0].delta.content
+            yield chunk_content
+
 # Initialize Streamlit State
 if SessionStateVariables.MESSAGES not in st.session_state:
     st.session_state[SessionStateVariables.MESSAGES] = []
 
-    # Connect to LLama Stack
-    logger.info("Initializing LLama Stack")
-    llama_stack_client, llama_stack_model = lls_connect()
-    llama_stack_all_models = get_all_lls_model_names(llama_stack_client)
- #   setup_tools(llama_stack_client)
-    llama_stack_model_name = get_lls_model_name()
-    llama_stack_agent = lls_create_agent(llama_stack_client, llama_stack_model_name, AGENT_SYSTEM_PROMPT, BASEBALL_CHAT_AGENTS)
-    logger.info("LLama Stack Initialized")
+    # Connect to Gateway
+    logger.info("Initializing Client")
+    gateway = LLamaStackGateway()
+    #gateway = ResponsesGateway()
+    gateway.connect()
+    st.session_state[SessionStateVariables.GATEWAY] = gateway
+    logger.info("Client Initialized")
 
-    # Save LLama Stack Connection Info
-    st.session_state["llama_stack_client"] = llama_stack_client
-    st.session_state["llama_stack_agent"] = llama_stack_agent
-    st.session_state["llama_stack_model"] = llama_stack_model.identifier
-    st.session_state["llama_stack_all_models"] = llama_stack_all_models
-
-    # Start session
-    llama_stack_session_id = lls_new_session(llama_stack_agent)
-    st.session_state[SessionStateVariables.SESSION_ID] = llama_stack_session_id
-
-# Retrieve LLama Stack connection info
-llama_stack_client = st.session_state["llama_stack_client"]
-llama_stack_agent = st.session_state["llama_stack_agent"]
-llama_stack_model = st.session_state["llama_stack_model"]
-llama_stack_session_id = st.session_state[SessionStateVariables.SESSION_ID]
-llama_stack_all_models = st.session_state["llama_stack_all_models"]
+# Retrieve connection info
+gateway = st.session_state[SessionStateVariables.GATEWAY]
+model_name = gateway.get_selected_model()
+all_models = gateway.get_models()
 
 # Called on a Model Select value change
 def on_model_select_change():
     new_model = st.session_state.selected_model_key
-    llama_stack_model = st.session_state["llama_stack_model"]
-    if new_model != llama_stack_model:
-        print (f"MODEL CHANGED: From {llama_stack_model} to {new_model}")
+    if new_model != model_name:
+        print (f"MODEL CHANGED: From {model_name} to {new_model}")
 
-        # update model in state
-        st.session_state["llama_stack_model"] = new_model
-        llama_stack_model = st.session_state["llama_stack_model"]
-
-        # recreate agent
+        # clear prior responses
         st.session_state[SessionStateVariables.MESSAGES] = []
-        llama_stack_agent = lls_create_agent(llama_stack_client, llama_stack_model, AGENT_SYSTEM_PROMPT, BASEBALL_CHAT_AGENTS)
-        st.session_state["llama_stack_agent"] = llama_stack_agent
-
-        # create a new session
-        llama_stack_session_id = lls_new_session(llama_stack_agent)
-        st.session_state[SessionStateVariables.SESSION_ID] = llama_stack_session_id
+        gateway.on_model_change(new_model)
 
 # Initialize High Level Page Structure
 st.set_page_config(page_title=AppUserInterfaceElements.TITLE,
@@ -100,14 +85,40 @@ st.markdown("""
 with col1:
     st.image("assets/header.png")
 with col2:
-    index = llama_stack_all_models.index(llama_stack_model)
-    option = st.selectbox(
-        "Model:",
-        options=llama_stack_all_models,
-        index=index,
-        key="selected_model_key",
-        on_change=on_model_select_change
-    )
+    col2a, col2b = st.columns([0.2, 0.8], vertical_alignment="top")
+    with col2a:
+        # Called on a Model Select value change
+        is_responses_checked = None
+        def on_responses_checkbox_change():
+            st.session_state[SessionStateVariables.MESSAGES] = []
+
+            # Connect to Gateway
+            gateway = None
+            if is_responses_checked:
+                logger.info("Initializing Responses Client")
+                gateway = ResponsesGateway()
+                gateway.connect()
+            else:
+                logger.info("Initializing LLama Stack Client")
+                gateway = LLamaStackGateway()
+                gateway.connect()
+            st.session_state[SessionStateVariables.GATEWAY] = gateway
+            logger.info("Client Initialized")
+
+        st.markdown(":small[Responses API?]")
+        is_responses_checked = st.checkbox("Responses",
+                                           on_change=on_responses_checkbox_change,
+                                           label_visibility="hidden",
+                                           value=False)
+    with col2b:
+        index = all_models.index(model_name)
+        option = st.selectbox(
+            "Model:",
+            options=all_models,
+            index=index,
+            key="selected_model_key",
+            on_change=on_model_select_change
+        )
 
 # Initialize Chat Box
 messages = st.container(height=400)
@@ -122,19 +133,11 @@ if user_input := st.chat_input():
     st.session_state.messages.append({"role": "user", "content": user_input})
     logger.info ("st.session_state.messages - %s", st.session_state.messages)
 
-    # Invoke Backend API
-    response = llama_stack_agent.create_turn(
-        session_id=llama_stack_session_id,
-        messages=[{"role":"user", "content": user_input}],
-        stream=True
-    )
-
-    # Capture streaming response
-    ai_response = ""
+    # Process chat
+    ai_response = None
     with messages.chat_message(MessageAttributes.ASSISTANT):
-        ai_response = st.write_stream(lls_streaming_turn_response_generator(response))
-
-    # Get AI Response to Latest Inquiry
+        placeholder = st.empty()
+        ai_response = gateway.process_user_chat(user_input, placeholder)
     logger.info ("AI Response Message: %s", ai_response)
 
     # Append AI Response to history

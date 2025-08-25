@@ -25,7 +25,7 @@ install:
 	pip install -r agent-game/requirements.txt
 
 run.chatbot:
-	cd chatbot/src && LLAMA_STACK_URL=$(LLAMA_STACK_URL) LLAMA_STACK_MODEL=$(LLAMA_STACK_MODEL) AGENT_UTILITIES_URL=$(AGENT_UTILITIES_URL) AGENT_TEAM_URL=$(AGENT_TEAM_URL) AGENT_GAME_URL=$(AGENT_GAME_URL) streamlit run app.py --server.headless true --server.address 0.0.0.0 --server.port $(LOCAL_PORT_CHATBOT)
+	cd chatbot/src && OPENAI_BASE_URL=$(LLAMA_STACK_URL)/v1/openai/v1 LLAMA_STACK_URL=$(LLAMA_STACK_URL) LLAMA_STACK_MODEL=$(LLAMA_STACK_MODEL) AGENT_UTILITIES_URL=$(AGENT_UTILITIES_URL) AGENT_TEAM_URL=$(AGENT_TEAM_URL) AGENT_GAME_URL=$(AGENT_GAME_URL) streamlit run app.py --server.headless true --server.address 0.0.0.0 --server.port $(LOCAL_PORT_CHATBOT)
 
 run.agent_utilities:
 	cd agent-utilities/src && python mcp_server.py
