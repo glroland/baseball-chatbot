@@ -20,31 +20,32 @@ logging.basicConfig(level=logging.INFO,
         logging.StreamHandler()
     ])
 
-def generate_response(stream):
+def reset_gateway(use_responses: bool):
+    """ Reset the gateway and models list.
+    
+        use_responses - true if the openai responses api should be used
     """
-    Extracts the content from the stream of responses from the OpenAI API.
-    Parameters:
-        stream: The stream of responses from the OpenAI API.
+    st.session_state[SessionStateVariables.RESPONSES] = use_responses
 
-    """
-
-    for chunk in stream:
-        delta = chunk.output[0].delta
-        if delta:
-            chunk_content = chunk.output[0].delta.content
-            yield chunk_content
-
-# Initialize Streamlit State
-if SessionStateVariables.MESSAGES not in st.session_state:
-    st.session_state[SessionStateVariables.MESSAGES] = []
-
-    # Connect to Gateway
-    logger.info("Initializing Client")
-    gateway = LLamaStackGateway()
-    #gateway = ResponsesGateway()
+    if use_responses:
+        logger.info("Initializing OpenAI Client")
+        gateway = ResponsesGateway()
+    else:
+        logger.info("Initializing LLama Stack Client")
+        gateway = LLamaStackGateway()
     gateway.connect()
     st.session_state[SessionStateVariables.GATEWAY] = gateway
     logger.info("Client Initialized")
+
+    logger.info("Clearing message history.")
+    st.session_state[SessionStateVariables.MESSAGES] = []
+
+    return gateway
+
+
+# Initialize Streamlit State
+if SessionStateVariables.MESSAGES not in st.session_state:
+    reset_gateway(False)
 
 # Retrieve connection info
 gateway = st.session_state[SessionStateVariables.GATEWAY]
@@ -87,29 +88,15 @@ with col1:
 with col2:
     col2a, col2b = st.columns([0.2, 0.8], vertical_alignment="top")
     with col2a:
-        # Called on a Model Select value change
-        is_responses_checked = None
-        def on_responses_checkbox_change():
-            st.session_state[SessionStateVariables.MESSAGES] = []
-
-            # Connect to Gateway
-            gateway = None
-            if is_responses_checked:
-                logger.info("Initializing Responses Client")
-                gateway = ResponsesGateway()
-                gateway.connect()
-            else:
-                logger.info("Initializing LLama Stack Client")
-                gateway = LLamaStackGateway()
-                gateway.connect()
-            st.session_state[SessionStateVariables.GATEWAY] = gateway
-            logger.info("Client Initialized")
-
         st.markdown(":small[Responses API?]")
         is_responses_checked = st.checkbox("Responses",
-                                           on_change=on_responses_checkbox_change,
                                            label_visibility="hidden",
-                                           value=False)
+                                           value=st.session_state[SessionStateVariables.RESPONSES])
+        if is_responses_checked != st.session_state[SessionStateVariables.RESPONSES]:
+            logger.info("Use Responses API checkbox clicked: %s", is_responses_checked)
+            reset_gateway(is_responses_checked)
+            st.rerun()
+
     with col2b:
         index = all_models.index(model_name)
         option = st.selectbox(
