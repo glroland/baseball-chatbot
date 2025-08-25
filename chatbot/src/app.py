@@ -51,6 +51,7 @@ if SessionStateVariables.MESSAGES not in st.session_state:
 gateway = st.session_state[SessionStateVariables.GATEWAY]
 model_name = gateway.get_selected_model()
 all_models = gateway.get_models()
+all_models.sort()
 
 # Called on a Model Select value change
 def on_model_select_change():
