@@ -43,7 +43,12 @@ def get_schedule_and_record(year:int, team_code:str) -> List[Dict[str, Any]]:
         logger.error("Both Team Code and Year are required fields.")
         raise ValueError("No parameters provided to get_schedule_and_record!")
 
-    pybaseball_data = pybaseball.schedule_and_record(year, team_code)
+    pybaseball_data = None
+    try:
+        pybaseball_data = pybaseball.schedule_and_record(year, team_code)
+    except ValueError as e:
+        logger.error("Pybaseball threw and exception due to data input.  %s", e)
+        return []
 
     results = []
 
@@ -82,23 +87,19 @@ def get_schedule_and_record(year:int, team_code:str) -> List[Dict[str, Any]]:
 )
 def search_mlb_games(year:int,
                      team_name_1:str,
-                     team_name_2:str = None,
-                     month:int = None,
-                     day:int = None) -> List[Dict[str, Any]]:
+                     team_name_2:str = None) -> List[Dict[str, Any]]:
     """ Search for individual Major League Baseball games matching the provided search parameters.
 
-    At least one search parameter must be provided.
+    At least two search parameters must be provided.
 
     No assumptions should be made about the year.  Do not call the tool in the event a year cannot be provided.
 
     :param year: Season in which to search for (required)
     :param team_name_1: Name of the first team to match (required)
     :param team_name_2: Name of the second team to match (optional)
-    :param month: Month when the game occurred (optional)
-    :param day: Day of month when the game occurred (optional)
     :returns: List of dictionaries containing attributes of matching games
     """
-    logger.info ("Performing Game Search.  Year=%s TeamName1=%s TeamName2=%s Month=%s Day=%s", year, team_name_1, team_name_2, month, day)
+    logger.info ("Performing Game Search.  Year=%s TeamName1=%s TeamName2=%s", year, team_name_1, team_name_2)
 
     # validate parameters
     if year is None or year <= 2000 or year > 2024:
@@ -108,16 +109,10 @@ def search_mlb_games(year:int,
         logger.error("Illegal value for team_name_1: %s", team_name_1)
         raise ValueError(f"Illegal value for team_name_1: {team_name_1}")
     if team_name_2 is not None and len(team_name_2) == 0:
-        team_name_2 = None
-    if month is not None and (month < 1 or month > 12):
-        logger.error("Illegal value for month: %s", month)
-        raise ValueError(f"Illegal value for month: {month}")
-    if day is not None and (day < 1 or day > 31):
-        logger.error("Illegal value for day: %s", day)
-        raise ValueError(f"Illegal value for day: {day}")
+        team_name_2 = team_name_1
 
     # build query
-    sql = """
+    sql = f"""
         select game_id, game_date, game_time,
             t_home.team_code t_home_code, t_home.team_location t_home_location, t_home.team_name t_home_name,
             t_visitor.team_code t_visitor_code, t_visitor.team_location t_visitor_location, t_visitor.team_name t_visitor_name,
@@ -129,30 +124,11 @@ def search_mlb_games(year:int,
         and date_part('year', game_date) = t_home.season_year
         and game.team_visiting = t_visitor.team_code
         and date_part('year', game_date) = t_visitor.season_year
-        and (game.team_home = 'ATL' or game.team_visiting = 'ATL')
-        and date_part('year', game_date) >= 2010
+        and (game.team_home = '{team_name_1}' or game.team_visiting = '{team_name_1}')
+        and (game.team_home = '{team_name_2}' or game.team_visiting = '{team_name_2}')
+        and date_part('year', game_date) = {year}
         order by game_date desc
         """
-    if team_name is not None and len(team_name) > 0:
-        sql += f"""
-            and (
-                upper(team_name) like upper('%{team_name}%')
-                or
-                upper('%{team_name}%') like '%' || upper(team_location) || '%' || upper(team_name) || '%'
-                )
-                """
-    if year is not None:
-        sql += f"and roster.season_year = {year} "
-    if position is not None and len(position) > 0:
-        sql += f"and upper(field_pos_desc) like upper('%{position}%') "
-    if name is not None and len(name) > 0:
-        sql += f"""
-            and (
-                upper('{name}') like '%' || upper(first_name) || '%' || upper(last_name) || '%'
-                or
-                upper('{name}') like '%' || upper(last_name) || '%'
-                )
-                """
     logger.debug ("Generated SQL for search - ", sql)
     print ("Generated SQL for search: ", sql)
 
@@ -171,25 +147,27 @@ def search_mlb_games(year:int,
             db_cursor.execute(sql)
             for record in db_cursor:
                 # collect row data
-                season = record[0]
-                team_name = record[1]
-                first_name = record[2]
-                last_name = record[3]
-                field_pos_desc = record[4]
-                throw_hand_code = record[5]
-                batting_hand_code = record[6]
-
-                # convert hand codes to descriptions
-                throw_hand = convert_hand_code_to_description(throw_hand_code)
-                batting_hand = convert_hand_code_to_description(batting_hand_code)
+                game_id = record[0]
+                game_date = record[1]
+                game_time = record[2]
+                t_home_code = record[3]
+                t_home_location = record[4]
+                t_home_name = record[5]
+                t_visitor_code = record[6]
+                t_visitor_location = record[7]
+                t_visitor_name = record[8]
+                score_visitor = record[9]
+                score_home = record[10]
+                night_flag = record[11]
+                temperature = record[12]
+                sky = record[13]
+                num_plays = record[14]
 
                 result = {
-                    "Season": season,
-                    "Team": team_name,
-                    "Name": first_name + " " + last_name,
-                    "Position": field_pos_desc,
-                    "Throwing Hand": throw_hand,
-                    "Batting Hand": batting_hand
+                    "Visitors": t_visitor_code,
+                    "Home": t_home_code,
+                    "Score": f"{score_visitor}-{score_home}",
+                    "Play Count": num_plays
                 }
                 results.append(result)
     
@@ -212,7 +190,9 @@ async def health_check(request):
 
     return JSONResponse({"status": "ok"})
 
-#get_schedule_and_record(year=2023, team_code='ATL')
+print(get_schedule_and_record(year=2023, team_code='NYY'))
+
+print(search_mlb_games(2023, team_name_1="ATL", team_name_2="BOS"))
 
 if __name__ == "__main__":
     port = 8080
