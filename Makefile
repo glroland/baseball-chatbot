@@ -1,10 +1,6 @@
 LLAMA_STACK_URL := https://my-llama-stack-my-llama-stack.apps.ocp.home.glroland.com
 #LLAMA_STACK_URL := http://envision:8321
 #LLAMA_STACK_URL := http://localhost:8321
-#LLAMA_STACK_MODEL := ollama/llama3.1:8b
-LLAMA_STACK_MODEL := meta-llama/Llama-3.3-70B-Instruct
-#LLAMA_STACK_MODEL := gpt-4.1-mini
-#LLAMA_STACK_MODEL := azure_openai/o4-mini
 EMBEDDING_MODEL := text-embedding-3-large
 
 IMAGE_REGISTRY := registry.home.glroland.com/baseball
@@ -25,7 +21,7 @@ install:
 	pip install -r agent-game/requirements.txt
 
 run.chatbot:
-	cd chatbot/src && OPENAI_BASE_URL=$(LLAMA_STACK_URL)/v1/openai/v1 LLAMA_STACK_URL=$(LLAMA_STACK_URL) LLAMA_STACK_MODEL=$(LLAMA_STACK_MODEL) AGENT_UTILITIES_URL=$(AGENT_UTILITIES_URL) AGENT_TEAM_URL=$(AGENT_TEAM_URL) AGENT_GAME_URL=$(AGENT_GAME_URL) streamlit run app.py --server.headless true --server.address 0.0.0.0 --server.port $(LOCAL_PORT_CHATBOT)
+	cd chatbot/src && OPENAI_BASE_URL=$(LLAMA_STACK_URL)/v1/openai/v1 LLAMA_STACK_URL=$(LLAMA_STACK_URL) AGENT_UTILITIES_URL=$(AGENT_UTILITIES_URL) AGENT_TEAM_URL=$(AGENT_TEAM_URL) AGENT_GAME_URL=$(AGENT_GAME_URL) streamlit run app.py --server.headless true --server.address 0.0.0.0 --server.port $(LOCAL_PORT_CHATBOT)
 
 run.agent_utilities:
 	cd agent-utilities/src && python mcp_server.py
