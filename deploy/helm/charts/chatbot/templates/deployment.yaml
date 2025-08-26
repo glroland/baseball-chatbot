@@ -46,11 +46,11 @@ spec:
                 configMapKeyRef:
                   name: {{ include "baseball-chatbot.fullname" . }}
                   key: LLAMA_STACK_URL
-            - name: LLAMA_STACK_MODEL
+            - name: OPENAI_BASE_URL
               valueFrom:
                 configMapKeyRef:
                   name: {{ include "baseball-chatbot.fullname" . }}
-                  key: LLAMA_STACK_MODEL
+                  key: OPENAI_BASE_URL
             - name: EMBEDDING_MODEL
               valueFrom:
                 configMapKeyRef:
