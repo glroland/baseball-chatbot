@@ -71,6 +71,8 @@ spec:
                 configMapKeyRef:
                   name: {{ include "baseball-chatbot.fullname" . }}
                   key: AGENT_GAME_URL
+            - name: OPENAI_API_KEY
+              value: "nokeyneeded"
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           readinessProbe:
