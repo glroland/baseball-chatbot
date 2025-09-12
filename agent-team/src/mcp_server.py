@@ -173,6 +173,9 @@ def search_mlb_rosters(team_name:str = None,
                 upper('{name}') like '%' || upper(last_name) || '%'
                 )
                 """
+    sql += f"""
+            order by roster.season_year, team_name, first_name, last_name, field_pos_desc, throw_hand, batting_hand 
+            """
     logger.debug ("Generated SQL for search - ", sql)
     print ("Generated SQL for search: ", sql)
 
@@ -203,18 +206,43 @@ def search_mlb_rosters(team_name:str = None,
                 throw_hand = convert_hand_code_to_description(throw_hand_code)
                 batting_hand = convert_hand_code_to_description(batting_hand_code)
 
-                result = {
-                    "Season": season,
-                    "Team": team_name,
-                    "Name": first_name + " " + last_name,
-                    "Position": field_pos_desc,
-                    "Throwing Hand": throw_hand,
-                    "Batting Hand": batting_hand
-                }
-                results.append(result)
+                # Create player name string
+                player_name = first_name + " " + last_name
+
+                # obtain previous result, if exists
+                prev_result = None
+                results_length = len(results)
+                if results_length > 0:
+                    prev_result = results[results_length - 1]
+
+                # determine whether to create or update previous record
+                if prev_result is not None and \
+                    prev_result["Team"] == team_name and \
+                    prev_result["Name"] == player_name and \
+                    prev_result["Position"] == field_pos_desc and \
+                    prev_result["Throwing Hand"] == throw_hand and \
+                    prev_result["Batting Hand"] == batting_hand and \
+                    prev_result["Last Season"] == (season - 1):
+
+                    # update previous record
+                    prev_result["Last Season"] = season
+                    logger.debug("Updated previous record: %s", result)
+
+                # create new record
+                else:
+                    result = {
+                        "Team": team_name,
+                        "Name": player_name,
+                        "Position": field_pos_desc,
+                        "Throwing Hand": throw_hand,
+                        "Batting Hand": batting_hand,
+                        "Starting Season": season,
+                        "Last Season": season,
+                    }
+                    logger.debug("Creating new record for result: %s", result)
+                    results.append(result)
     
-    logger.debug("Results: %s", results)
-    pprint (results)
+    logger.info("Results: %s", results)
 
     return results
 
