@@ -100,6 +100,18 @@ class ResponsesGateway(Gateway):
             tools=[
                 {
                     "type": "mcp",
+                    "server_label": "mcp::agent-team",
+                    "server_url": "https://baseball-chatbot-agent-team-baseball-chatbot.apps.ocp.home.glroland.com/sse",
+                    "require_approval": "never"
+                },
+                {
+                    "type": "mcp",
+                    "server_label": "mcp::agent-game",
+                    "server_url": "https://baseball-chatbot-agent-game-baseball-chatbot.apps.ocp.home.glroland.com/sse",
+                    "require_approval": "never"
+                },
+                {
+                    "type": "mcp",
                     "server_label": "mcp::agent-utilities",
                     "server_url": "https://baseball-chatbot-agent-utilities-baseball-chatbot.apps.ocp.home.glroland.com/sse",
     #                "allowed_tools": ["get_current_temperature", "get_temperature_on_past_date"],
