@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/python-311:9.6-1750969934
+FROM registry.access.redhat.com/ubi9/python-312:9.6-1760372467
 
 # Configuration
 ENV LLAMA_STACK_URL "http://envision:8321"

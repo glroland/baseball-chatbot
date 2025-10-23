@@ -1,6 +1,6 @@
 pytest
 pylint
-llama-stack-client
+llama-stack-client==0.3.0
 mcp[cli]
 openmeteo-requests
 requests-cache

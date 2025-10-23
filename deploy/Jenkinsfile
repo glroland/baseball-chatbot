@@ -27,7 +27,7 @@ pipeline
       {
          steps 
          {
-            sh 'cd agent-team ; docker build . --tag agent-team:$BUILD_NUMBER'
+            sh 'cd agent-team ; docker build --no-cache . --tag agent-team:$BUILD_NUMBER'
             sh 'cd agent-team ; docker save agent-team:$BUILD_NUMBER > agent-team-dockerimage.tar'
             step(followSymlinks: false, artifacts: 'agent-team/agent-team-dockerimage.tar', $class: 'ArtifactArchiver')
             sh 'cd agent-team ; docker rmi agent-team:$BUILD_NUMBER'
@@ -38,7 +38,7 @@ pipeline
       {
          steps 
          {
-            sh 'cd agent-game ; docker build . --tag agent-game:$BUILD_NUMBER'
+            sh 'cd agent-game ; docker build --no-cache . --tag agent-game:$BUILD_NUMBER'
             sh 'cd agent-game ; docker save agent-game:$BUILD_NUMBER > agent-game-dockerimage.tar'
             step(followSymlinks: false, artifacts: 'agent-game/agent-game-dockerimage.tar', $class: 'ArtifactArchiver')
             sh 'cd agent-game ; docker rmi agent-game:$BUILD_NUMBER'
@@ -49,7 +49,7 @@ pipeline
       {
          steps 
          {
-            sh 'cd agent-utilities ; docker build . --tag agent-utilities:$BUILD_NUMBER'
+            sh 'cd agent-utilities ; docker build --no-cache . --tag agent-utilities:$BUILD_NUMBER'
             sh 'cd agent-utilities ; docker save agent-utilities:$BUILD_NUMBER > agent-utilities-dockerimage.tar'
             step(followSymlinks: false, artifacts: 'agent-utilities/agent-utilities-dockerimage.tar', $class: 'ArtifactArchiver')
             sh 'cd agent-utilities ; docker rmi agent-utilities:$BUILD_NUMBER'
@@ -60,7 +60,7 @@ pipeline
       {
          steps 
          {
-            sh 'cd chatbot ; docker build . --tag chatbot:$BUILD_NUMBER'
+            sh 'cd chatbot ; docker build --no-cache . --tag chatbot:$BUILD_NUMBER'
             sh 'cd chatbot ; docker save chatbot:$BUILD_NUMBER > chatbot-dockerimage.tar'
             step(followSymlinks: false, artifacts: 'chatbot/chatbot-dockerimage.tar', $class: 'ArtifactArchiver')
             sh 'cd chatbot ; docker rmi chatbot:$BUILD_NUMBER'

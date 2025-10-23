@@ -3,6 +3,6 @@ pylint
 streamlit
 watchdog
 requests
-llama-stack-client
+llama-stack-client==0.3.0
 fire
 openai
