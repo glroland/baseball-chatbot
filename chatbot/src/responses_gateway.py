@@ -45,6 +45,9 @@ class ResponsesGateway(Gateway):
         
             Returns: preferred default model to use
         """
+        if self.ENV_DEFAULT_MODEL in os.environ and len(os.environ[self.ENV_DEFAULT_MODEL]) > 0:
+            return os.environ[self.ENV_DEFAULT_MODEL]
+
         return self.PREFERRED_DEFAULT_MODEL
 
 
@@ -104,12 +107,12 @@ class ResponsesGateway(Gateway):
                     "server_url": "https://baseball-chatbot-agent-team-baseball-chatbot.apps.ocp.home.glroland.com/sse",
                     "require_approval": "never"
                 },
-                {
-                    "type": "mcp",
-                    "server_label": "mcp::agent-game",
-                    "server_url": "https://baseball-chatbot-agent-game-baseball-chatbot.apps.ocp.home.glroland.com/sse",
-                    "require_approval": "never"
-                },
+#                {
+#                    "type": "mcp",
+#                    "server_label": "mcp::agent-game",
+#                    "server_url": "https://baseball-chatbot-agent-game-baseball-chatbot.apps.ocp.home.glroland.com/sse",
+#                    "require_approval": "never"
+#                },
                 {
                     "type": "mcp",
                     "server_label": "mcp::agent-utilities",

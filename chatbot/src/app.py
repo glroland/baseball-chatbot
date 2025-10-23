@@ -10,7 +10,6 @@ from constants import CannedGreetings
 from constants import MessageAttributes
 from constants import Tools
 from responses_gateway import ResponsesGateway
-from lls_gateway import LLamaStackGateway
 
 logger = logging.getLogger(__name__)
 
@@ -20,19 +19,14 @@ logging.basicConfig(level=logging.INFO,
         logging.StreamHandler()
     ])
 
-def reset_gateway(use_responses: bool):
+def reset_gateway():
     """ Reset the gateway and models list.
     
         use_responses - true if the openai responses api should be used
     """
-    st.session_state[SessionStateVariables.RESPONSES] = use_responses
 
-    if use_responses:
-        logger.info("Initializing OpenAI Client")
-        gateway = ResponsesGateway()
-    else:
-        logger.info("Initializing LLama Stack Client")
-        gateway = LLamaStackGateway()
+    logger.info("Initializing OpenAI Client")
+    gateway = ResponsesGateway()
     gateway.connect()
     st.session_state[SessionStateVariables.GATEWAY] = gateway
     logger.info("Client Initialized")
@@ -45,7 +39,7 @@ def reset_gateway(use_responses: bool):
 
 # Initialize Streamlit State
 if SessionStateVariables.MESSAGES not in st.session_state:
-    reset_gateway(False)
+    reset_gateway()
 
 # Retrieve connection info
 gateway = st.session_state[SessionStateVariables.GATEWAY]
@@ -87,26 +81,14 @@ st.markdown("""
 with col1:
     st.image("assets/header.png")
 with col2:
-    col2a, col2b = st.columns([0.2, 0.8], vertical_alignment="top")
-    with col2a:
-        st.markdown(":small[Responses API?]")
-        is_responses_checked = st.checkbox("Responses",
-                                           label_visibility="hidden",
-                                           value=st.session_state[SessionStateVariables.RESPONSES])
-        if is_responses_checked != st.session_state[SessionStateVariables.RESPONSES]:
-            logger.info("Use Responses API checkbox clicked: %s", is_responses_checked)
-            reset_gateway(is_responses_checked)
-            st.rerun()
-
-    with col2b:
-        index = all_models.index(model_name)
-        option = st.selectbox(
-            "Model:",
-            options=all_models,
-            index=index,
-            key="selected_model_key",
-            on_change=on_model_select_change
-        )
+    index = all_models.index(model_name)
+    option = st.selectbox(
+        "Model:",
+        options=all_models,
+        index=index,
+        key="selected_model_key",
+        on_change=on_model_select_change
+    )
 
 # Initialize Chat Box
 messages = st.container(height=400)

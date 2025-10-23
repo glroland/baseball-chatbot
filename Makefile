@@ -2,6 +2,7 @@ LLAMA_STACK_URL := https://my-llama-stack-my-llama-stack.apps.ocp.home.glroland.
 #LLAMA_STACK_URL := http://envision:8321
 #LLAMA_STACK_URL := http://localhost:8321
 EMBEDDING_MODEL := text-embedding-3-large
+DEFAULT_MODEL := together/meta-llama/Llama-4-Scout-17B-16E-Instruct
 
 IMAGE_REGISTRY := registry.home.glroland.com/baseball
 IMAGE_TAG := manual-1
@@ -21,7 +22,7 @@ install:
 	pip install -r agent-game/requirements.txt
 
 run.chatbot:
-	cd chatbot/src && OPENAI_BASE_URL=$(LLAMA_STACK_URL)/v1/openai/v1 LLAMA_STACK_URL=$(LLAMA_STACK_URL) AGENT_UTILITIES_URL=$(AGENT_UTILITIES_URL) AGENT_TEAM_URL=$(AGENT_TEAM_URL) AGENT_GAME_URL=$(AGENT_GAME_URL) streamlit run app.py --server.headless true --server.address 0.0.0.0 --server.port $(LOCAL_PORT_CHATBOT)
+	cd chatbot/src && OPENAI_BASE_URL=$(LLAMA_STACK_URL)/v1/openai/v1 DEFAULT_MODEL=$(DEFAULT_MODEL) LLAMA_STACK_URL=$(LLAMA_STACK_URL) AGENT_UTILITIES_URL=$(AGENT_UTILITIES_URL) AGENT_TEAM_URL=$(AGENT_TEAM_URL) AGENT_GAME_URL=$(AGENT_GAME_URL) streamlit run app.py --server.headless true --server.address 0.0.0.0 --server.port $(LOCAL_PORT_CHATBOT)
 
 run.agent_utilities:
 	cd agent-utilities/src && python mcp_server.py

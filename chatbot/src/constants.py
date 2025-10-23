@@ -26,7 +26,6 @@ class SessionStateVariables:
     MESSAGES = "messages"
     MODEL = "model"
     GATEWAY = "gateway"
-    RESPONSES = "responses"
 
 # pylint: disable=too-few-public-methods
 class AppUserInterfaceElements:
