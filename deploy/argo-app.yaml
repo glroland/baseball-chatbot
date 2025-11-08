@@ -4,18 +4,16 @@ metadata:
   name: baseball-chatbot
 spec:
   destination:
-    name: ''
+    name: in-cluster
     namespace: baseball-chatbot
-    server: 'https://kubernetes.default.svc'
+    server: https://kubernetes.default.svc
   source:
-    path: 'deploy/helm'
-    repoURL: 'https://github.com/glroland/baseball-chatbot.git'
+    path: deploy/helm
+    repoURL: https://github.com/glroland/baseball-chatbot.git
     targetRevision: HEAD
     helm:
       valueFiles:
         - values.yaml
   sources: []
   project: default
-  syncPolicy:
-    automated:
-      prune: true
+
