@@ -137,6 +137,15 @@ class ResponsesGateway(Gateway):
                 "require_approval": "never"
             }
             mcp_list.append(mcp_server_team)
+
+            # create mcp server entry - game
+            mcp_server_game = {
+                "type": "mcp",
+                "server_label": Tools.BASEBALL_AGENT_GAME,
+                "server_url": mcp_game_url,
+                "require_approval": "never"
+            }
+            mcp_list.append(mcp_server_game)
         else:
             logger.info("MCP Servers not provided with ENV variables.  Querying LLama Stack API")
             mcp_list = self.get_all_mcps_as_tools(Tools.ALL)

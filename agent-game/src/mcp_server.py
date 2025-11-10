@@ -86,8 +86,8 @@ def get_schedule_and_record(year:int, team_code:str) -> List[Dict[str, Any]]:
     }
 )
 def search_mlb_games(year:int,
-                     team_name_1:str,
-                     team_name_2:str = None) -> List[Dict[str, Any]]:
+                     team_code_1:str,
+                     team_code_2:str = None) -> List[Dict[str, Any]]:
     """ Search for individual Major League Baseball games matching the provided search parameters.
 
     At least two search parameters must be provided.
@@ -95,21 +95,21 @@ def search_mlb_games(year:int,
     No assumptions should be made about the year.  Do not call the tool in the event a year cannot be provided.
 
     :param year: Season in which to search for (required)
-    :param team_name_1: Name of the first team to match (required)
-    :param team_name_2: Name of the second team to match (optional)
+    :param team_code_1: Three letter team code of the first team to match (required)
+    :param team_code_2: Three letter team code of the second team to match (optional)
     :returns: List of dictionaries containing attributes of matching games
     """
-    logger.info ("Performing Game Search.  Year=%s TeamName1=%s TeamName2=%s", year, team_name_1, team_name_2)
+    logger.info ("Performing Game Search.  Year=%s TeamName1=%s TeamName2=%s", year, team_code_1, team_code_2)
 
     # validate parameters
     if year is None or year <= 2000 or year > 2024:
         logger.error("Illegal value for year: %s", year)
         raise ValueError(f"Illegal value for year: {year}")
-    if team_name_1 is None or len(team_name_1) == 0:
-        logger.error("Illegal value for team_name_1: %s", team_name_1)
-        raise ValueError(f"Illegal value for team_name_1: {team_name_1}")
-    if team_name_2 is not None and len(team_name_2) == 0:
-        team_name_2 = team_name_1
+    if team_code_1 is None or len(team_code_1) != 3:
+        logger.error("Illegal value for team_name_1: %s", team_code_1)
+        raise ValueError(f"Illegal value for team_name_1: {team_code_1}")
+    if team_code_2 is None:
+        team_code_2 = team_code_1
 
     # build query
     sql = f"""
@@ -123,8 +123,8 @@ def search_mlb_games(year:int,
         and date_part('year', game_date) = t_home.season_year
         and game.team_visiting = t_visitor.team_code
         and date_part('year', game_date) = t_visitor.season_year
-        and (game.team_home = '{team_name_1}' or game.team_visiting = '{team_name_1}')
-        and (game.team_home = '{team_name_2}' or game.team_visiting = '{team_name_2}')
+        and (game.team_home = '{team_code_1}' or game.team_visiting = '{team_code_1}')
+        and (game.team_home = '{team_code_2}' or game.team_visiting = '{team_code_2}')
         and date_part('year', game_date) = {year}
         order by game_date desc
         """
@@ -188,7 +188,7 @@ async def health_check(request):
 
 print(get_schedule_and_record(year=2023, team_code='NYY'))
 
-print(search_mlb_games(2023, team_name_1="ATL", team_name_2="BOS"))
+print(search_mlb_games(2023, team_code_1="ATL", team_code_2="BOS"))
 
 if __name__ == "__main__":
     port = 8080
