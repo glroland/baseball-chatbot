@@ -6,10 +6,9 @@ metadata:
     {{- include "baseball-chatbot.labels" . | nindent 4 }}
 immutable: false
 data:
-  LLAMA_STACK_URL: "http://my-llama-stack.my-llama-stack.svc:8080"
-  OPENAI_BASE_URL: "http://my-llama-stack.my-llama-stack.svc:8080/v1/openai/v1"
-  DEFAULT_MODEL: "together/meta-llama/Llama-4-Scout-17B-16E-Instruct"
-  EMBEDDING_MODEL: "sentence-transformers/all-MiniLM-L6-v2"
+  OPENAI_BASE_URL: "http://my-llama-stack.my-llama-stack.svc:8080/v1"
+  DEFAULT_MODEL: "together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
+  EMBEDDING_MODEL: "sentence-transformers/sentence-transformers/all-mpnet-base-v2"
   AGENT_UTILITIES_URL: "http://{{ .Release.Name }}-agent-utilities.baseball-chatbot.svc:8080/sse"
   AGENT_TEAM_URL: "http://{{ .Release.Name }}-agent-team.baseball-chatbot.svc:8080/sse"
   AGENT_GAME_URL: "http://{{ .Release.Name }}-agent-game.baseball-chatbot.svc:8080/sse"

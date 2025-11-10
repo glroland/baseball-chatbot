@@ -41,11 +41,6 @@ spec:
           ports:
           - containerPort: {{ .Values.image.port }}
           env:
-            - name: LLAMA_STACK_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "baseball-chatbot.fullname" . }}
-                  key: LLAMA_STACK_URL
             - name: OPENAI_BASE_URL
               valueFrom:
                 configMapKeyRef:
