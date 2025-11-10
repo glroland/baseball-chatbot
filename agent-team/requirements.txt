@@ -1,5 +1,4 @@
 pytest
 pylint
-llama-stack-client==0.3.0
 mcp[cli]
 psycopg[binary]

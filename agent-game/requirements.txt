@@ -1,6 +1,5 @@
 pytest
 pylint
-llama-stack-client==0.3.0
 pybaseball
 mcp[cli]
 psycopg[binary]

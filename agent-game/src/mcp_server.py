@@ -80,7 +80,7 @@ def get_schedule_and_record(year:int, team_code:str) -> List[Dict[str, Any]]:
 
 @mcp.tool(
     annotations={
-        "title": "Get game details such as weather, score and number of plays for individiaul games matching the search parameters",
+        "title": "Get game details such as score and number of plays for individual games matching the search parameters",
         "readOnlyHint": True,
         "openWorldHint": True,
     }
@@ -117,7 +117,6 @@ def search_mlb_games(year:int,
             t_home.team_code t_home_code, t_home.team_location t_home_location, t_home.team_name t_home_name,
             t_visitor.team_code t_visitor_code, t_visitor.team_location t_visitor_location, t_visitor.team_name t_visitor_name,
             score_visitor, score_home,
-            night_flag, temperature, sky,
             (select count(*) from game_play where game_play.game_id = game.game_id) num_plays
         from game, team t_home, team t_visitor
         where game.team_home = t_home.team_code
@@ -158,10 +157,7 @@ def search_mlb_games(year:int,
                 t_visitor_name = record[8]
                 score_visitor = record[9]
                 score_home = record[10]
-                night_flag = record[11]
-                temperature = record[12]
-                sky = record[13]
-                num_plays = record[14]
+                num_plays = record[11]
 
                 result = {
                     "Visitors": t_visitor_code,
