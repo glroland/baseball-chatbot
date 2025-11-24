@@ -246,10 +246,10 @@ def search_mlb_rosters(team_name:str = None,
 
     return results
 
+# Create ASGI application
+app = mcp.streamable_http_app()
 
-sse_app = mcp.sse_app()
-
-@sse_app.route("/health")
+@app.route("/health")
 async def health_check(request):
     """ Health check endpoint for the MCP Server. """
     # check database connection
@@ -279,4 +279,4 @@ if __name__ == "__main__":
         log_level = os.environ[ENV_LOG_LEVEL]
     print ("Log Level: ", log_level)
 
-    uvicorn.run(sse_app, host="0.0.0.0", port=port, log_level=log_level)
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level=log_level)

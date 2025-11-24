@@ -10,9 +10,9 @@ IMAGE_TAG := manual-1
 LOCAL_PORT_CHATBOT := 8080
 
 BASEBALL_DB_CONNECTION_STRING = postgresql://baseball_app:baseball123@db.home.glroland.com:5432/baseball_db
-AGENT_UTILITIES_URL = https://baseball-chatbot-agent-utilities-baseball-chatbot.apps.ocp.home.glroland.com/sse
-AGENT_TEAM_URL = https://baseball-chatbot-agent-team-baseball-chatbot.apps.ocp.home.glroland.com/sse
-AGENT_GAME_URL = https://baseball-chatbot-agent-game-baseball-chatbot.apps.ocp.home.glroland.com/sse
+AGENT_UTILITIES_URL = https://baseball-chatbot-agent-utilities-baseball-chatbot.apps.ocp.home.glroland.com/mcp
+AGENT_TEAM_URL = https://baseball-chatbot-agent-team-baseball-chatbot.apps.ocp.home.glroland.com/mcp
+AGENT_GAME_URL = https://baseball-chatbot-agent-game-baseball-chatbot.apps.ocp.home.glroland.com/mcp
 
 install:
 	pip install -r requirements.txt
