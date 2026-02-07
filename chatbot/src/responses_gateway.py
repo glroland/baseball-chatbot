@@ -158,7 +158,7 @@ class ResponsesGateway(Gateway):
             input="Question:\n" + user_input,
             tools=mcp_list,
             temperature=0.3,
-#            max_output_tokens=int(2048),
+#            max_output_tokens=2048,    # bug in llama stack
             store=True,
             previous_response_id=self.previous_response_id,
             parallel_tool_calls=True,
