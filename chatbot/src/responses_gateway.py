@@ -40,7 +40,7 @@ class ResponsesGateway(Gateway):
 
         response_list = []
         for model in models:
-            response_list.append(model.identifier)
+            response_list.append(model.id)
         response_list.sort()
         logger.info("Model List: %s", response_list)
 
@@ -158,8 +158,7 @@ class ResponsesGateway(Gateway):
             input="Question:\n" + user_input,
             tools=mcp_list,
             temperature=0.3,
-            max_output_tokens=2048,
-            top_p=1,
+#            max_output_tokens=int(2048),
             store=True,
             previous_response_id=self.previous_response_id,
             parallel_tool_calls=True,

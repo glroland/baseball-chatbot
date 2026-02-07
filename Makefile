@@ -2,7 +2,7 @@ LLAMA_STACK_URL := https://my-llama-stack-my-llama-stack.apps.ocp.home.glroland.
 #LLAMA_STACK_URL := http://envision:8321
 #LLAMA_STACK_URL := http://localhost:8321
 EMBEDDING_MODEL := sentence-transformers/sentence-transformers/all-mpnet-base-v2
-DEFAULT_MODEL := together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8
+DEFAULT_MODEL := together/mistralai/Ministral-3-14B-Instruct-2512
 
 IMAGE_REGISTRY := registry.home.glroland.com/baseball
 IMAGE_TAG := manual-1
