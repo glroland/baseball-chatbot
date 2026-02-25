@@ -1,12 +1,13 @@
 import os
 import logging
-import re
 from datetime import datetime
 from typing import Dict, Any, List
 from pprint import pprint
 import psycopg
 import uvicorn
-from mcp.server.fastmcp import FastMCP
+from fastapi import FastAPI
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from fastmcp import FastMCP
 from starlette.responses import JSONResponse
 import pybaseball
 
@@ -18,6 +19,12 @@ ENV_MCP_PORT = "MCP_PORT"
 ENV_LOG_LEVEL = "LOG_LEVEL"
 
 mcp = FastMCP("MLB Games MCP Server")
+mcp_asgi_app = mcp.http_app(path="/", stateless_http=True)
+
+# Create FastAPI application
+app = FastAPI(lifespan=mcp_asgi_app.lifespan)
+app.mount("/mcp", mcp_asgi_app)
+FastAPIInstrumentor.instrument_app(app)
 
 @mcp.tool(
     annotations={
@@ -172,11 +179,8 @@ def search_mlb_games(year:int,
 
     return results
 
-# Create ASGI application
-app = mcp.streamable_http_app()
-
-@app.route("/health")
-async def health_check(request):
+@app.get("/health")
+async def health_check():
     """ Health check endpoint for the MCP Server. """
     # check database connection
     db_connection_string = os.environ[ENV_DB_CONNECTION_STRING]

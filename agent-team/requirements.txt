@@ -1,4 +1,9 @@
 pytest
 pylint
-mcp[cli]
 psycopg[binary]
+pydantic
+fastmcp
+fastapi
+opentelemetry-distro
+opentelemetry-exporter-otlp
+opentelemetry-instrumentation-fastapi

@@ -20,4 +20,4 @@ RUN pip install -r requirements.txt
 COPY ./src/ .
 
 # Specify the command to run on container start
-CMD [ "python", "mcp_server.py" ]
+CMD [ "opentelemetry-instrument", "--logs_exporter", "none", "--metrics_exporter", "none", "python", "mcp_server.py" ]

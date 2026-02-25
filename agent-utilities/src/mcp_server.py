@@ -3,7 +3,9 @@ import logging
 import dateparser
 from datetime import timedelta, datetime
 import uvicorn
-from mcp.server.fastmcp import FastMCP
+from fastapi import FastAPI
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from fastmcp import FastMCP
 from starlette.responses import JSONResponse
 from geopy.geocoders import Nominatim
 import openmeteo_requests
@@ -25,6 +27,12 @@ logger = logging.getLogger(__name__)
 
 # Start MCP Server
 mcp = FastMCP(name="Utilities MCP Server")
+mcp_asgi_app = mcp.http_app(path="/", stateless_http=True)
+
+# Create FastAPI application
+app = FastAPI(lifespan=mcp_asgi_app.lifespan)
+app.mount("/mcp", mcp_asgi_app)
+FastAPIInstrumentor.instrument_app(app)
 
 @mcp.tool(
     annotations={
@@ -179,14 +187,10 @@ def get_current_date_and_time() -> datetime:
     print ("Current Date and Time is ", current_date_and_time)
     return current_date_and_time
 
-# Create ASGI application
-app = mcp.streamable_http_app()
-
-@app.route("/health")
-async def health_check(request):
+@app.get("/health")
+async def health_check():
     """ Health check endpoint for the MCP Server. """
     return JSONResponse({"status": "ok"})
-
 
 if __name__ == "__main__":
     port = 8080

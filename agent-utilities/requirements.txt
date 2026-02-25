@@ -1,6 +1,5 @@
 pytest
 pylint
-mcp[cli]
 openmeteo-requests
 requests-cache
 retry-requests
@@ -8,3 +7,9 @@ numpy
 pandas
 geopy
 dateparser
+pydantic
+fastmcp
+fastapi
+opentelemetry-distro
+opentelemetry-exporter-otlp
+opentelemetry-instrumentation-fastapi

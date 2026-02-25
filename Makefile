@@ -14,12 +14,20 @@ AGENT_UTILITIES_URL = https://baseball-chatbot-agent-utilities-baseball-chatbot.
 AGENT_TEAM_URL = https://baseball-chatbot-agent-team-baseball-chatbot.apps.ocp.home.glroland.com/mcp
 AGENT_GAME_URL = https://baseball-chatbot-agent-game-baseball-chatbot.apps.ocp.home.glroland.com/mcp
 
+HAS_UV := $(shell command -v uv >/dev/null 2>&1; if [ $$? -eq 0 ]; then echo "true"; else echo "false"; fi)
+ifeq ($(HAS_UV), true)
+    PIP = uv pip
+else
+    PIP = pip
+endif
+
 install:
-	pip install -r requirements.txt
-	pip install -r chatbot/requirements.txt
-	pip install -r agent-utilities/requirements.txt
-	pip install -r agent-team/requirements.txt
-	pip install -r agent-game/requirements.txt
+	@echo "Using $(PIP) for installation of Python dependencies..."
+	$(PIP) install -r requirements.txt
+	$(PIP) install -r chatbot/requirements.txt
+	$(PIP) install -r agent-utilities/requirements.txt
+	$(PIP) install -r agent-team/requirements.txt
+	$(PIP) install -r agent-game/requirements.txt
 
 run.chatbot:
 	cd chatbot/src && OPENAI_BASE_URL=$(LLAMA_STACK_URL)/v1 DEFAULT_MODEL=$(DEFAULT_MODEL) LLAMA_STACK_URL=$(LLAMA_STACK_URL) AGENT_UTILITIES_URL=$(AGENT_UTILITIES_URL) AGENT_TEAM_URL=$(AGENT_TEAM_URL) AGENT_GAME_URL=$(AGENT_GAME_URL) streamlit run app.py --server.headless true --server.address 0.0.0.0 --server.port $(LOCAL_PORT_CHATBOT)
