@@ -2,7 +2,8 @@ LLAMA_STACK_URL := https://my-llama-stack-my-llama-stack.apps.ocp.home.glroland.
 #LLAMA_STACK_URL := http://envision:8321
 #LLAMA_STACK_URL := http://localhost:8321
 EMBEDDING_MODEL := sentence-transformers/sentence-transformers/all-mpnet-base-v2
-DEFAULT_MODEL := together/mistralai/Ministral-3-14B-Instruct-2512
+DEFAULT_MODEL := together/openai/gpt-oss-20b
+#vllm-inference/gpt-oss-20b-essential
 
 IMAGE_REGISTRY := registry.home.glroland.com/baseball
 IMAGE_TAG := manual-1
@@ -29,16 +30,16 @@ install:
 	$(PIP) install -r agent-team/requirements.txt
 	$(PIP) install -r agent-game/requirements.txt
 
-run.chatbot:
+run-chatbot:
 	cd chatbot/src && OPENAI_BASE_URL=$(LLAMA_STACK_URL)/v1 DEFAULT_MODEL=$(DEFAULT_MODEL) LLAMA_STACK_URL=$(LLAMA_STACK_URL) AGENT_UTILITIES_URL=$(AGENT_UTILITIES_URL) AGENT_TEAM_URL=$(AGENT_TEAM_URL) AGENT_GAME_URL=$(AGENT_GAME_URL) streamlit run app.py --server.headless true --server.address 0.0.0.0 --server.port $(LOCAL_PORT_CHATBOT)
 
-run.agent_utilities:
+run-agent-utilities:
 	cd agent-utilities/src && python mcp_server.py
 
-run.agent_team:
+run-agent-team:
 	cd agent-team/src && MCP_PORT=8080 DB_CONNECTION_STRING=$(BASEBALL_DB_CONNECTION_STRING) python mcp_server.py
 
-run.agent_game:
+run-agent-game:
 	cd agent-game/src && MCP_PORT=8080 DB_CONNECTION_STRING=$(BASEBALL_DB_CONNECTION_STRING) python mcp_server.py
 
 build:
