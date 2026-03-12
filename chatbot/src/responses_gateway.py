@@ -168,7 +168,7 @@ class ResponsesGateway(Gateway):
         # Capture response
         ai_response = ""
         for event in response_stream:
-            logger.info("Event: %s", event)
+            #logger.info("Event: %s", event)
             if hasattr(event, "type") and "text.delta" in event.type:
                 ai_response += event.delta
                 with placeholder.container():
