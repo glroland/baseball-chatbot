@@ -7,3 +7,4 @@ metadata:
 immutable: false
 data:
   DB_CONNECTION_STRING: "postgresql://baseball_app:baseball123@db.home.glroland.com:5432/baseball_db"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://eclipse.home.glroland.com:4317"

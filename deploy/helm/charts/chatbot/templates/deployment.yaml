@@ -41,6 +41,11 @@ spec:
           ports:
           - containerPort: {{ .Values.image.port }}
           env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "baseball-chatbot.fullname" . }}
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
             - name: OPENAI_BASE_URL
               valueFrom:
                 configMapKeyRef:

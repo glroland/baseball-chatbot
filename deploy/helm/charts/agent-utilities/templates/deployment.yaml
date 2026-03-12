@@ -48,6 +48,11 @@ spec:
                 configMapKeyRef:
                   name: {{ include "baseball-chatbot.fullname" . }}
                   key: DB_CONNECTION_STRING
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "baseball-chatbot.fullname" . }}
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           resources:

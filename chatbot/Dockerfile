@@ -6,6 +6,9 @@ ENV EMBEDDING_MODEL "sentence-transformers/sentence-transformers/all-mpnet-base-
 ENV AGENT_UTILITIES_URL "https://baseball-chatbot-agent-utilities-baseball-chatbot.apps.ocp.home.glroland.com/sse"
 ENV AGENT_TEAM_URL "https://baseball-chatbot-agent-team-baseball-chatbot.apps.ocp.home.glroland.com/sse"
 ENV AGENT_GAME_URL "https://baseball-chatbot-agent-game-baseball-chatbot.apps.ocp.home.glroland.com/sse"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+ENV OTEL_SERVICE_NAME=baseball-chatbot-web
+ENV OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=false
 
 # By default, listen on port 8080
 EXPOSE 8080/tcp

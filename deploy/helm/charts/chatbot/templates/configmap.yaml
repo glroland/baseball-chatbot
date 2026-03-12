@@ -12,3 +12,4 @@ data:
   AGENT_UTILITIES_URL: "http://{{ .Release.Name }}-agent-utilities.baseball-chatbot.svc:8080/mcp"
   AGENT_TEAM_URL: "http://{{ .Release.Name }}-agent-team.baseball-chatbot.svc:8080/mcp"
   AGENT_GAME_URL: "http://{{ .Release.Name }}-agent-game.baseball-chatbot.svc:8080/mcp"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://eclipse.home.glroland.com:4317"
