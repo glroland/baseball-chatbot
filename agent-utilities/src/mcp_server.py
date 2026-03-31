@@ -1,6 +1,7 @@
 import os
 import logging
 import dateparser
+import asyncio
 from datetime import timedelta, datetime
 import uvicorn
 from fastapi import FastAPI
@@ -41,7 +42,7 @@ FastAPIInstrumentor.instrument_app(app)
         "openWorldHint": True,
     }
 )
-def get_temperature_on_past_date(location: str, date: str = None) -> float:
+async def get_temperature_on_past_date(location: str, date: str = None) -> float:
     """ Gets the temperature for the provided location on the specified date.
 
     :param location: Location
@@ -77,6 +78,7 @@ def get_temperature_on_past_date(location: str, date: str = None) -> float:
 
     # get temperature for date
     logger.info("Getting Temperature for %s as of %s", location, date)
+
     # format date
     date_parsed = dateparser.parse(date)
     date_formatted_str = date_parsed.strftime("%Y-%m-%d")
@@ -101,6 +103,7 @@ def get_temperature_on_past_date(location: str, date: str = None) -> float:
     # Process daily data
     daily = response.Daily()
     temp = daily.Variables(0).ValuesAsNumpy()[0]   # max temp
+    temp = float(temp)
 
     logger.info("Temp at %s on %s is %s", location, date, temp)
     print ("Temp at", location, "on", date, "is", temp)
@@ -115,7 +118,7 @@ def get_temperature_on_past_date(location: str, date: str = None) -> float:
         "openWorldHint": True,
     }
 )
-def get_current_temperature(location: str) -> float:
+async def get_current_temperature(location: str) -> float:
     """ Gets the temperature for the provided location on the specified date.
 
     :param location: Location
@@ -175,7 +178,7 @@ def get_current_temperature(location: str) -> float:
         "openWorldHint": True,
     }
 )
-def get_current_date_and_time() -> datetime:
+async def get_current_date_and_time() -> datetime:
     """ Gets the current date and time.
     """
     logger.info ("Getting current date and time.")
@@ -186,6 +189,22 @@ def get_current_date_and_time() -> datetime:
     logger.info("Current Date and Time: %s", current_date_and_time)
     print ("Current Date and Time is ", current_date_and_time)
     return current_date_and_time
+
+
+@mcp.tool(
+    annotations={
+        "title": "Causes the system to go to sleep for a period of time",
+        "readOnlyHint": True,
+        "openWorldHint": True,
+    }
+)
+async def go_to_sleep(how_long_in_seconds : int):
+    """ Gets the current date and time.
+    """
+    logger.info ("Going to sleep for %s seconds.", how_long_in_seconds)
+    await asyncio.sleep(how_long_in_seconds)
+    logger.info("Awaking after sleeping for %s seconds.", how_long_in_seconds)
+
 
 @app.get("/health")
 async def health_check():
