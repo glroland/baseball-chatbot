@@ -2,6 +2,7 @@ import os
 import logging
 import dateparser
 import asyncio
+import time
 from datetime import timedelta, datetime
 import uvicorn
 from fastapi import FastAPI
@@ -193,17 +194,23 @@ async def get_current_date_and_time() -> datetime:
 
 @mcp.tool(
     annotations={
-        "title": "Causes the system to go to sleep for a period of time",
+        "title": "Causes the system to go to sleep for a period of time.  Returns the number of seconds it actually slept",
         "readOnlyHint": True,
         "openWorldHint": True,
     }
 )
-async def go_to_sleep(how_long_in_seconds : int):
+async def go_to_sleep(how_long_in_seconds : int) -> int:
     """ Gets the current date and time.
     """
     logger.info ("Going to sleep for %s seconds.", how_long_in_seconds)
+
+    start_time = time.time()
     await asyncio.sleep(how_long_in_seconds)
+    end_time = time.time()
+    duration = int((end_time - start_time))
     logger.info("Awaking after sleeping for %s seconds.", how_long_in_seconds)
+
+    return duration
 
 
 @app.get("/health")
